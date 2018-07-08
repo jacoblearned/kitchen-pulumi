@@ -1,12 +1,12 @@
 version: 2
 jobs:
-  build:
+  setup:
     docker:
       - image: circleci/ruby:2.4.1-node-browsers
 
     steps:
       - checkout
-      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: gem install bundler && bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
             - ./vendor/bundle
@@ -37,8 +37,12 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
+  build:
     jobs:
-      - build
-      - lint
-      - test
+      - setup
+      - lint:
+          requires:
+            - setup
+      - test:
+          requires:
+            - setup

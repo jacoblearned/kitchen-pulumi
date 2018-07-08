@@ -2,4 +2,4 @@
 
 require 'kitchen/pulumi'
 
-::Kitchen::Pulumi::VERSION = '0.0.1'.freeze
+::Kitchen::Pulumi::VERSION = '0.0.1'

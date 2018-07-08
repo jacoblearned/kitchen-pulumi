@@ -7,13 +7,13 @@ jobs:
     steps:
       - checkout
       - run:
-        name: install dependencies
-        command: |
-          bundle install --jobs=4 --retry=3 --path vendor/bundle
+          name: install dependencies
+          command: |
+            bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
-        paths:
-          - ./vendor/bundle
-        key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
 
   lint:
     docker:
@@ -23,8 +23,8 @@ jobs:
       - restore_cache:
           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
       - run:
-        name: lint
-        command: bundle exec rake lint
+          name: lint
+          command: bundle exec rake lint
 
   test:
     docker:
@@ -36,10 +36,18 @@ jobs:
       - run:
           name: run tests
           command: |
-            mkdir /tmp/test-results
-            bundle exec rake spec
+          mkdir /tmp/test-results
+          bundle exec rake spec
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
           destination: test-results
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - setup
+      - lint
+      - test

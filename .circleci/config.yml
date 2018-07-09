@@ -1,43 +1,24 @@
 version: 2
 jobs:
-  setup:
+   build:
     docker:
       - image: circleci/ruby:2.4.1-node-browsers
 
     steps:
       - checkout
-      - run:
-          name: install dependencies
-          command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
-            - ./vendor/bundle
+            - vendor/bundle
           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
 
-  lint:
-    docker:
-      - image: circleci/ruby:2.4.1-node-browsers
-    steps:
-      - checkout
-      - restore_cache:
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: lint
-          command: bundle exec rake lint
+      - run: bundle exec rake lint
 
-  test:
-    docker:
-       - image: circleci/ruby:2.4.1-node-browsers
-    steps:
-      - checkout
-      - restore_cache:
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: run tests
-          command: |
-          mkdir /tmp/test-results
-          bundle exec rake spec
+      - run: mkdir /tmp/test-results && bundle exec rake spec
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
@@ -48,6 +29,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - setup
-      - lint
-      - test
+      - build

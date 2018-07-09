@@ -4,6 +4,11 @@ lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'kitchen/pulumi/version'
 
+desc = <<~DESC
+  Kitchen-Pulumi makes it easy to add integration tests \
+  to Pulumi-based infrastructure projects.
+DESC
+
 ::Gem::Specification.new do |spec|
   spec.name = 'kitchen-pulumi'
   spec.version = ::Kitchen::Pulumi::VERSION
@@ -13,10 +18,7 @@ require 'kitchen/pulumi/version'
   spec.summary = 'Test-Kitchen plugins for Pulumi projects'
   spec.files = Dir.glob('{lib/**/*.rb,README.md}')
   spec.license = 'MIT'
-  spec.description = <<-DESC
-Kitchen-Pulumi makes it easy to add integration tests \
-to Pulumi-based infrastructure projects.
-  DESC
+  spec.description = desc
 
   spec.add_development_dependency 'guard', '~> 2.14'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'

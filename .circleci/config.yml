@@ -6,11 +6,14 @@ jobs:
 
     steps:
       - checkout
-      - run: gem install bundler && bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
+            - /usr/local/bundle/config
             - vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
 
   lint:
     docker:

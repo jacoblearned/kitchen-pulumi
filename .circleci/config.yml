@@ -6,11 +6,10 @@ jobs:
 
     steps:
       - checkout
-      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: bundle install --jobs=4 --retry=3
       - save_cache:
           paths:
-            - /usr/local/bundle/config
-            - vendor/bundle
+            - ~/.bundle
           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
 
   lint:

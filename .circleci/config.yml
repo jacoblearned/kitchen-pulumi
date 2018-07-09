@@ -6,11 +6,18 @@ jobs:
 
     steps:
       - checkout
-      - run: bundle install --jobs=4 --retry=3
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies
+      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
-            - ~/.bundle
+            - vendor/bundle
           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+      - persist_to_workspace:
+          paths:
+            - vendor/bundle
 
   lint:
     docker:

@@ -11,8 +11,12 @@ require 'kitchen/pulumi/version'
   spec.email = ['jacobmlearned@gmail.com']
   spec.homepage = 'https://github.com/jacoblearned/kitchen-pulumi'
   spec.summary = 'Test-Kitchen plugins for Pulumi projects'
-  spec.description = spec.summary
   spec.files = Dir.glob('{lib/**/*.rb,README.md}')
+  spec.license = 'MIT'
+  spec.description = <<-DESC
+Kitchen-Pulumi makes it easy to add integration tests \
+to Pulumi-based infrastructure projects.
+  DESC
 
   spec.add_development_dependency 'guard', '~> 2.14'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
@@ -24,7 +28,7 @@ require 'kitchen/pulumi/version'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'
   spec.add_development_dependency 'rubocop', '~> 0.58'
 
-  spec.add_dependency 'logger', '~> 1.2.8'
+  spec.add_dependency 'logger', '~> 1.2'
 
   spec.add_runtime_dependency 'dry-types', '~> 0.13'
   spec.add_runtime_dependency 'dry-validation', '~> 0.12'

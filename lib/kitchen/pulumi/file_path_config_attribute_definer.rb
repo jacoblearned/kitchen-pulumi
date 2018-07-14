@@ -5,6 +5,7 @@ require 'kitchen/pulumi/config_attribute_definer'
 
 module Kitchen
   module Pulumi
+    # Class for defining config attributes that are consumed as file paths
     class FilePathConfigAttributeDefiner
       def initialize(attribute:, schema:)
         @attribute = attribute

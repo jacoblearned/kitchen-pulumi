@@ -1,3 +1,7 @@
 ---
 AllCops:
   TargetRubyVersion: 2.4
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma

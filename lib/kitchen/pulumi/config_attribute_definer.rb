@@ -4,6 +4,8 @@ require 'kitchen/pulumi'
 
 module Kitchen
   module Pulumi
+    # This class defines attributes consumed from .kitchen.yml and
+    # used in the Test Kitchen plugins.
     class ConfigAttributeDefiner
       def initialize(attribute:, schema:)
         @attribute = attribute.to_sym
@@ -28,7 +30,7 @@ module Kitchen
         return true if messages.empty?
         raise(
           ::Kitchen::UserError,
-          "#{plugin_class} config: #{@attribute} #{messages}"
+          "#{plugin_class} config: #{@attribute} #{messages}",
         )
       end
     end

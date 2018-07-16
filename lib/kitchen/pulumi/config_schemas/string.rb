@@ -6,7 +6,7 @@ require 'kitchen/pulumi/config_schemas'
 module Kitchen
   module Pulumi
     ConfigSchemas::String = ::Dry::Validation.Schema do
-      required(:value).filled :str?
+      required(:value).maybe :str?
     end
   end
 end

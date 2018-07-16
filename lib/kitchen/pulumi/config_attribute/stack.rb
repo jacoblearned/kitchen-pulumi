@@ -15,14 +15,14 @@ module Kitchen
             attribute: self,
             schema: ConfigSchemas::String,
           )
-          definer.definer(plugin_class: plugin_class)
+          definer.define(plugin_class: plugin_class)
         end
 
         def self.to_sym
           :stack
         end
 
-        extend config_attribute_cacher
+        extend ConfigAttributeCacher
 
         def config_stack_default_value
           ''

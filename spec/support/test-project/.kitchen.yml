@@ -1,0 +1,23 @@
+---
+driver:
+  name: pulumi
+
+suites:
+  - name: test-project-dev-west
+    driver:
+      stack: kitchen
+      config:
+        - aws:
+          - key: region
+            value: us-west-2
+
+  - name: test-project-dev-east
+    driver:
+      stack: kitchen
+      config:
+        - aws:
+          - key: region
+            value: us-east-1
+
+platforms:
+  - name: default

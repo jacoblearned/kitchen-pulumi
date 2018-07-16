@@ -1,0 +1,3 @@
+name: test-project
+description: test project for kitchen-pulumi
+runtime: python

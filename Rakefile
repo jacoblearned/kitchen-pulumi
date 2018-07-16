@@ -14,3 +14,9 @@ RSpec::Core::RakeTask.new(:spec) do |t|
     --out /tmp/test-results/rspec.xml
   ARGS
 end
+
+desc 'Integration tests'
+task :integration_test do
+  Dir.chdir('spec/support/test-project')
+  sh 'bundle exec kitchen create'
+end

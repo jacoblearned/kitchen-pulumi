@@ -4,20 +4,21 @@ require 'kitchen'
 require 'spec_helper'
 require 'kitchen/driver/pulumi'
 
+# rubocop:disable Metrics/ParameterLists
+# rubocop:disable Metrics/BlockLength
 describe ::Kitchen::Driver::Pulumi do
-
   def kitchen_instance(driver_instance, kitchen_root)
     ::Kitchen::Instance.new(
       driver: driver_instance,
       logger: driver_instance.send(:logger),
       platform: ::Kitchen::Platform.new(name: 'test-platform'),
       provisioner: ::Kitchen::Provisioner::Base.new,
-      suite: ::Kitchen::Suite::new(name: 'test-suite'),
+      suite: ::Kitchen::Suite.new(name: 'test-suite'),
       transport: ::Kitchen::Transport::Base.new,
       verifier: ::Kitchen::Verifier::Base.new,
       state_file: ::Kitchen::StateFile.new(
         kitchen_root,
-        'test-suite-test-platfrom'
+        'test-suite-test-platfrom',
       ),
     )
   end
@@ -54,10 +55,12 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(stack: "dev")
+        driver = configure_driver(stack: 'dev')
         expect { driver.create({}) }
           .to output(/Created stack 'dev'/).to_stdout_from_any_process
       end
     end
   end
 end
+# rubocop:enable Metrics/ParameterLists
+# rubocop:enable Metrics/BlockLength

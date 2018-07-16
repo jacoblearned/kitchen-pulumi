@@ -1,7 +1,13 @@
 ---
 AllCops:
   TargetRubyVersion: 2.4
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
+Metrics/MethodLength:
+  Max: 15
+Metrics/AbcSize:
+  Max: 16

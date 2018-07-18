@@ -9,9 +9,9 @@ module Kitchen
     # Module orchestrating calls to the Pulumi CLI
     module ShellOut
       # Shells out to the Pulumi CLI
-      def self.run(command:, duration: 7200, logger:, &block)
+      def self.run(cmd:, duration: 7200, logger:, &block)
         block ||= ->(stdout) { stdout }
-        shell_out(command: command, duration: duration, logger: logger, &block)
+        shell_out(command: cmd, duration: duration, logger: logger, &block)
       rescue ::Errno::EACCES, ::Errno::ENOENT,
              ::Mixlib::ShellOut::InvalidCommandOption,
              ::Mixlib::ShellOut::CommandTimeout,

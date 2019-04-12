@@ -36,5 +36,5 @@ DESC
   spec.add_runtime_dependency 'dry-validation', '~> 0.12'
   spec.add_runtime_dependency 'kitchen-inspec', '>= 0.23', '< 2.0'
   spec.add_runtime_dependency 'mixlib-shellout', '~> 2.3'
-  spec.add_runtime_dependency 'test-kitchen', '~> 1.22'
+  spec.add_runtime_dependency 'test-kitchen', '>= 1.22', '< 3.0'
 end

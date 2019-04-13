@@ -15,8 +15,8 @@ module Kitchen
       rescue ::Errno::EACCES, ::Errno::ENOENT,
              ::Mixlib::ShellOut::InvalidCommandOption,
              ::Mixlib::ShellOut::CommandTimeout,
-             ::Mixlib::ShellOut::ShellCommandFailed => error
-        raise(::Kitchen::Pulumi::Error, "Error: #{error.message}")
+             ::Mixlib::ShellOut::ShellCommandFailed => e
+        raise(::Kitchen::Pulumi::Error, "Error: #{e.message}")
       end
 
       def self.shell_out(command:, duration: 7200, logger:)

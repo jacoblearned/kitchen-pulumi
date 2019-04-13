@@ -16,6 +16,7 @@ describe ::Kitchen::Driver::Pulumi do
       suite: ::Kitchen::Suite.new(name: 'test-suite'),
       transport: ::Kitchen::Transport::Base.new,
       verifier: ::Kitchen::Verifier::Base.new,
+      lifecycle_hooks: ::Kitchen::LifecycleHooks.new({}),
       state_file: ::Kitchen::StateFile.new(
         kitchen_root,
         'test-suite-test-platfrom',
@@ -32,7 +33,7 @@ describe ::Kitchen::Driver::Pulumi do
     config = {
       kitchen_root: kitchen_root,
       directory: directory,
-      stack: stack,
+      stack: stack.empty? ? "kitchen-pulumi-test-#{rand(10**10)}" : stack,
       private_cloud: private_cloud,
       plugins: plugins,
       config: config,
@@ -49,15 +50,17 @@ describe ::Kitchen::Driver::Pulumi do
       in_tmp_project_dir('test-project') do
         driver = configure_driver
         expect { driver.create({}) }
-          .to output(/Created stack 'test-suite'/).to_stdout_from_any_process
+          .to output(/Created stack 'kitchen-pulumi-test/)
+          .to_stdout_from_any_process
       end
     end
 
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(stack: 'dev')
+        stack_name = "dev-#{rand(10**10)}"
+        driver = configure_driver(stack: stack_name)
         expect { driver.create({}) }
-          .to output(/Created stack 'dev'/).to_stdout_from_any_process
+          .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
     end
   end

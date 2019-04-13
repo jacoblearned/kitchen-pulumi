@@ -28,7 +28,7 @@ DESC
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rspec-json_expectations', '~> 2.1'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'
-  spec.add_development_dependency 'rubocop', '~> 0.58'
+  spec.add_development_dependency 'rubocop', '~> 0.67'
 
   spec.add_dependency 'logger', '~> 1.2'
 

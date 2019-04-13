@@ -27,15 +27,21 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::Stack
 
       def create(_state)
+        dir = "-C #{config_directory}"
         stack = config_stack.empty? ? instance.suite.name : config_stack
         ppc = "--ppc #{config_private_cloud}" unless config_private_cloud.empty?
 
+        initialize_stack(stack: stack, ppc: ppc, dir: dir)
+        configure(stack: stack, dir: dir)
+      end
+
+      def initialize_stack(stack:, ppc: '', dir: '.')
         ::Kitchen::Pulumi::ShellOut.run(
-          command: "stack init #{stack} #{ppc} -C #{config_directory}",
+          cmd: "stack init #{stack} #{ppc} #{dir}",
           logger: logger,
         )
-      rescue ::Kitchen::Pulumi::Error => error
-        if error.message.match?(/stack '#{stack}' already exists/)
+      rescue ::Kitchen::Pulumi::Error => e
+        if e.message.match?(/stack '#{stack}' already exists/)
           puts 'Continuing...'
         end
       end

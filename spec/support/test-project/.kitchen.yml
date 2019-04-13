@@ -5,16 +5,22 @@ driver:
 suites:
   - name: test-project-dev-west
     driver:
-      stack: kitchen
+      stack: dev-west
       config:
+        - test-project:
+          - key: bucket_name
+            value: kitchen-pulumi-8009408424
         - aws:
           - key: region
             value: us-west-2
 
   - name: test-project-dev-east
     driver:
-      stack: kitchen
+      stack: dev-east
       config:
+        - test-project:
+          - key: bucket_name
+            value: kitchen-pulumi-9089332077
         - aws:
           - key: region
             value: us-east-1

@@ -1,23 +1,33 @@
-version: 2
-jobs:
-   build:
-    docker:
-      - image: circleci/ruby:2.4.1-node-browsers
+version: 2.1
 
+orbs:
+  pulumi: pulumi/pulumi@1.0.0
+
+jobs:
+  build_24: &build
+    docker:
+      - image: circleci/ruby:2.4.6
     steps:
       - checkout
+
+      # Ensure Pulumi CLI is available for use
+      - pulumi/login
+
+      # Install dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Gemfile.lock" }}
-            - v1-dependencies
+            - kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
+            - kitchen-pulumi-dependencies
       - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
             - vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+          key: kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
 
+      # Lint
       - run: bundle exec rake lint
 
+      # Run unit tests
       - run: mkdir /tmp/test-results && bundle exec rake spec
       - store_test_results:
           path: /tmp/test-results
@@ -25,8 +35,20 @@ jobs:
           path: /tmp/test-results
           destination: test-results
 
+  build_25:
+    <<: *build
+    docker:
+      - image: circleci/ruby:2.5.5
+
+  build_26:
+    <<: *build
+    docker:
+      - image: circleci/ruby:2.6.2
+
+
 workflows:
-  version: 2
   build:
     jobs:
-      - build
+      - build_24
+      - build_25
+      - build_26

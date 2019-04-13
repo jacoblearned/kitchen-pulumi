@@ -28,6 +28,7 @@ module Kitchen
 
       def process_schema_messages(messages:, plugin_class:)
         return true if messages.empty?
+
         raise(
           ::Kitchen::UserError,
           "#{plugin_class} config: #{@attribute} #{messages}",

@@ -45,6 +45,23 @@ module Kitchen
           puts 'Continuing...'
         end
       end
+
+      def configure(stack:, dir: '.')
+        config_config.each do |namespace|
+          ns = namespace.keys.first
+          config_items = namespace.fetch(ns)
+
+          config_items.each do |config_item|
+            key = config_item.fetch(:key, '')
+            val = config_item.fetch(:value, '')
+
+            ::Kitchen::Pulumi::ShellOut.run(
+              cmd: "config set #{ns}:#{key} #{val} -s #{stack} #{dir}",
+              logger: logger,
+            )
+          end
+        end
+      end
     end
   end
 end

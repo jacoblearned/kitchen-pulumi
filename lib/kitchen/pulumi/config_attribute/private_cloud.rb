@@ -3,16 +3,15 @@
 require 'kitchen/pulumi'
 require 'kitchen/pulumi/config_schemas/string'
 require 'kitchen/pulumi/config_attribute_cacher'
-require 'kitchen/pulumi/file_path_config_attribute_definer'
+require 'kitchen/pulumi/config_attribute_definer'
 
 module Kitchen
   module Pulumi
     module ConfigAttribute
-      # Attribute used to specify the directory containing a project's
-      # Pulumi.yaml file
-      module Directory
+      # Attribute used to specify the Pulumi Private Cloud URL for a stack
+      module PrivateCloud
         def self.included(plugin_class)
-          definer = FilePathConfigAttributeDefiner.new(
+          definer = ConfigAttributeDefiner.new(
             attribute: self,
             schema: ConfigSchemas::String,
           )
@@ -20,13 +19,13 @@ module Kitchen
         end
 
         def self.to_sym
-          :directory
+          :private_cloud
         end
 
         extend ConfigAttributeCacher
 
-        def config_directory_default_value
-          '.'
+        def config_private_cloud_default_value
+          ''
         end
       end
     end

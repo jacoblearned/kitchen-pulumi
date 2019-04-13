@@ -1,0 +1,3 @@
+config:
+  aws:region: us-west-2
+  test-project:bucket_name: kitchen-pulumi-8009408424

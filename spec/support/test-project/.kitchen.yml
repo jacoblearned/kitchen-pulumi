@@ -2,6 +2,9 @@
 driver:
   name: pulumi
 
+provisioner:
+  name: pulumi
+
 suites:
   - name: test-project-dev-west
     driver:

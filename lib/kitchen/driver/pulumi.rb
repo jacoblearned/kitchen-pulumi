@@ -57,6 +57,10 @@ module Kitchen
           cmd: "stack rm --preserve-config -y -s #{stack} #{dir}",
           logger: logger,
         )
+      rescue ::Kitchen::Pulumi::Error => e
+        if e.message.match?(/no stack named '#{stack}' found/)
+          puts 'Continuing...'
+        end
       end
 
       def initialize_stack(stack:, ppc: '', dir: '.')

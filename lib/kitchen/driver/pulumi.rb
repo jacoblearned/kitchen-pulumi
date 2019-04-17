@@ -35,6 +35,30 @@ module Kitchen
         configure(stack: stack, dir: dir)
       end
 
+      def provision(_state)
+        stack = config_stack.empty? ? instance.suite.name : config_stack
+        dir = "-C #{config_directory}"
+
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "up -y -r --show-config -s #{stack} #{dir}",
+          logger: logger,
+        )
+      end
+
+      def destroy(_state)
+        stack = config_stack.empty? ? instance.suite.name : config_stack
+        dir = "-C #{config_directory}"
+
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "destroy -y -r --show-config -s #{stack} #{dir}",
+          logger: logger,
+        )
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "stack rm --preserve-config -y -s #{stack} #{dir}",
+          logger: logger,
+        )
+      end
+
       def initialize_stack(stack:, ppc: '', dir: '.')
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "stack init #{stack} #{ppc} #{dir}",

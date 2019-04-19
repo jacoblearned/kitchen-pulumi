@@ -7,6 +7,9 @@ require 'kitchen/driver/pulumi'
 # rubocop:disable Metrics/ParameterLists
 # rubocop:disable Metrics/BlockLength
 describe ::Kitchen::Driver::Pulumi do
+  let(:stack_name) { "test-stack-#{rand(10**10)}" }
+  let(:bucket_name) { 'foo-bucket' }
+
   def kitchen_instance(driver_instance, kitchen_root)
     ::Kitchen::Instance.new(
       driver: driver_instance,
@@ -57,10 +60,25 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
-        stack_name = "dev-#{rand(10**10)}"
         driver = configure_driver(stack: stack_name)
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
+      end
+    end
+  end
+
+  context '#provision' do
+    it 'should update a stack' do
+      in_tmp_project_dir('test-project') do
+        config = [{}]
+        config[0]['test-project'] = [{ key: 'bucket_name', value: bucket_name }]
+        driver = configure_driver(stack: stack_name, config: config)
+
+        expect do
+          driver.create({})
+          driver.provision({})
+        end.to output(/Stack test-project-#{stack_name} created/)
+          .to_stdout_from_any_process
       end
     end
   end

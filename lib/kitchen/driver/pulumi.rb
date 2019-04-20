@@ -6,6 +6,7 @@ require 'kitchen/pulumi/error'
 require 'kitchen/pulumi/shell_out'
 require 'kitchen/pulumi/configurable'
 require 'kitchen/pulumi/config_attribute/config'
+require 'kitchen/pulumi/config_attribute/config_file'
 require 'kitchen/pulumi/config_attribute/directory'
 require 'kitchen/pulumi/config_attribute/plugins'
 require 'kitchen/pulumi/config_attribute/private_cloud'
@@ -22,6 +23,7 @@ module Kitchen
 
       # Include config attributes consumable via .kitchen.yml
       include ::Kitchen::Pulumi::ConfigAttribute::Config
+      include ::Kitchen::Pulumi::ConfigAttribute::ConfigFile
       include ::Kitchen::Pulumi::ConfigAttribute::Directory
       include ::Kitchen::Pulumi::ConfigAttribute::Plugins
       include ::Kitchen::Pulumi::ConfigAttribute::PrivateCloud
@@ -64,7 +66,7 @@ module Kitchen
         end
       end
 
-      def initialize_stack(stack, ppc = '', dir = '.')
+      def initialize_stack(stack, ppc = '', dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "stack init #{stack} #{ppc} #{dir}",
           logger: logger,
@@ -75,13 +77,19 @@ module Kitchen
         end
       end
 
-      def configure(stack_settings_hash, stack, dir = '.', is_secret: false)
+      def configure(stack_settings_hash, stack, dir = '', is_secret: false)
         secret = is_secret ? '--secret' : ''
+        conf_file = if File.directory?(config_config_file)
+                      ''
+                    else
+                      "--config-file #{config_config_file}"
+                    end
+        base_cmd = "config set #{secret} -s #{stack} #{dir} #{conf_file}"
 
-        stack_settings_hash.each do |ns, stack_settings|
-          stack_settings.each do |k, v|
+        stack_settings_hash.each do |namespace, stack_settings|
+          stack_settings.each do |key, val|
             ::Kitchen::Pulumi::ShellOut.run(
-              cmd: "config set #{secret} #{ns}:#{k} #{v} -s #{stack} #{dir}",
+              cmd: "#{base_cmd} #{namespace}:#{key} #{val}",
               logger: logger,
             )
           end

@@ -27,7 +27,7 @@ module Kitchen
         extend ConfigAttributeCacher
 
         def config_config_default_value
-          []
+          {}
         end
       end
     end

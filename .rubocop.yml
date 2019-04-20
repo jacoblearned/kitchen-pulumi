@@ -9,3 +9,5 @@ Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 Metrics/MethodLength:
   Max: 15
+Metrics/AbcSize:
+  Max: 16

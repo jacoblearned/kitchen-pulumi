@@ -32,17 +32,19 @@ describe ::Kitchen::Driver::Pulumi do
                        stack: '',
                        private_cloud: '',
                        plugins: [],
-                       config: [])
-    config = {
+                       config: {},
+                       secrets: {})
+    driver_config = {
       kitchen_root: kitchen_root,
       directory: directory,
       stack: stack.empty? ? "kitchen-pulumi-test-#{rand(10**10)}" : stack,
       private_cloud: private_cloud,
       plugins: plugins,
       config: config,
+      secrets: secrets,
     }
 
-    driver = described_class.new(config)
+    driver = described_class.new(driver_config)
     kitchen_instance = kitchen_instance(driver, '.')
     driver.finalize_config!(kitchen_instance)
     driver
@@ -70,16 +72,23 @@ describe ::Kitchen::Driver::Pulumi do
   context '#provision' do
     it 'should update a stack' do
       in_tmp_project_dir('test-project') do
-        config = [{}]
-        config[0]['test-project'] = [{ key: 'bucket_name', value: bucket_name }]
-        driver = configure_driver(stack: stack_name, config: config)
+        config = { 'test-project': { bucket_name: bucket_name } }
+        secrets = { 'test-project': { ssh_key: 'ShouldBeSecret' } }
 
-        expect do
+        driver = configure_driver(
+          stack: stack_name,
+          config: config,
+          secrets: secrets,
+        )
+
+        expected = expect do
           driver.create({})
           driver.update({})
           driver.update({})
-        end.to output(/Stack test-project-#{stack_name} created/)
+        end
+        expected.to output(/Stack test-project-#{stack_name} created/)
           .to_stdout_from_any_process
+        expected.to output(/ssh_key:\s+\[secret\]/).to_stdout_from_any_process
       end
     end
   end
@@ -87,8 +96,8 @@ describe ::Kitchen::Driver::Pulumi do
   context '#destroy' do
     it 'should destroy and remove a stack' do
       in_tmp_project_dir('test-project') do
-        config = [{}]
-        config[0]['test-project'] = [{ key: 'bucket_name', value: bucket_name }]
+        config = { 'test-project': { bucket_name: bucket_name } }
+
         driver = configure_driver(stack: stack_name, config: config)
 
         expect { driver.destroy({}) }

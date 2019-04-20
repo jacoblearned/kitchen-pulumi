@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'kitchen/pulumi/config_attribute'
-require 'kitchen/pulumi/config_schemas/hash_of_hashes'
+require 'kitchen/pulumi/config_schemas/stack_settings_hash'
 require 'kitchen/pulumi/config_attribute_cacher'
 require 'kitchen/pulumi/config_attribute_definer'
 
@@ -15,7 +15,7 @@ module Kitchen
         def self.included(plugin)
           definer = ConfigAttributeDefiner.new(
             attribute: self,
-            schema: ConfigSchemas::HashOfHashes,
+            schema: ConfigSchemas::StackSettingsHash,
           )
           definer.define(plugin_class: plugin)
         end

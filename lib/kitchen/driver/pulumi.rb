@@ -75,10 +75,10 @@ module Kitchen
         end
       end
 
-      def configure(config_hash, stack, dir = '.', is_secret: false)
+      def configure(stack_settings_hash, stack, dir = '.', is_secret: false)
         secret = is_secret ? '--secret' : ''
 
-        config_hash.each do |ns, stack_settings|
+        stack_settings_hash.each do |ns, stack_settings|
           stack_settings.each do |k, v|
             ::Kitchen::Pulumi::ShellOut.run(
               cmd: "config set #{secret} #{ns}:#{k} #{v} -s #{stack} #{dir}",

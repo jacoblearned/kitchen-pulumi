@@ -49,12 +49,12 @@ module Kitchen
         stack = config_stack.empty? ? instance.suite.name : config_stack
         dir = "-C #{config_directory}"
 
-        cmd = <<~CMD
-          destroy -y -r --show-config -s #{stack} #{dir}
-          stack rm --preserve-config -y -s #{stack} #{dir}
-        CMD
+        cmds = [
+          "destroy -y -r --show-config -s #{stack} #{dir}",
+          "stack rm --preserve-config -y -s #{stack} #{dir}",
+        ]
 
-        ::Kitchen::Pulumi::ShellOut.run(cmd: cmd, logger: logger)
+        ::Kitchen::Pulumi::ShellOut.run(cmd: cmds, logger: logger)
       rescue ::Kitchen::Pulumi::Error => e
         if e.message.match?(/no stack named '#{stack}' found/)
           puts 'Continuing...'

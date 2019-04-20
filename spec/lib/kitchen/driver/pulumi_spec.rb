@@ -82,6 +82,27 @@ describe ::Kitchen::Driver::Pulumi do
       end
     end
   end
+
+  context '#destroy' do
+    it 'should destroy and remove a stack' do
+      in_tmp_project_dir('test-project') do
+        config = [{}]
+        config[0]['test-project'] = [{ key: 'bucket_name', value: bucket_name }]
+        driver = configure_driver(stack: stack_name, config: config)
+
+        expect { driver.destroy({}) }
+          .to output(/no stack named '#{stack_name}' found/)
+          .to_stdout_from_any_process
+
+        expect do
+          driver.create({})
+          driver.update({})
+          driver.destroy({})
+        end.to output(/Stack test-project-#{stack_name} deleted/)
+          .to_stdout_from_any_process
+      end
+    end
+  end
 end
 # rubocop:enable Metrics/ParameterLists
 # rubocop:enable Metrics/BlockLength

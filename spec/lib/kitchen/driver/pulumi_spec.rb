@@ -76,7 +76,7 @@ describe ::Kitchen::Driver::Pulumi do
 
         expect do
           driver.create({})
-          driver.provision({})
+          driver.update({})
         end.to output(/Stack test-project-#{stack_name} created/)
           .to_stdout_from_any_process
       end

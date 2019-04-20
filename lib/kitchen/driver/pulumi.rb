@@ -35,7 +35,7 @@ module Kitchen
         configure(stack: stack, dir: dir)
       end
 
-      def provision(_state)
+      def update(_state)
         stack = config_stack.empty? ? instance.suite.name : config_stack
         dir = "-C #{config_directory}"
 

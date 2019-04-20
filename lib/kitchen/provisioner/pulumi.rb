@@ -15,7 +15,7 @@ module Kitchen
 
       # Runs stack updates via the instance driver
       def call(state)
-        instance.driver.provision(state)
+        instance.driver.update(state)
       rescue ::Kitchen::Pulumi::Error => e
         raise(::Kitchen::ActionFailed, e.message)
       end

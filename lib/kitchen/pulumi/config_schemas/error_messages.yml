@@ -2,6 +2,6 @@
 en:
   errors:
     stack_settings_hash?: >
-      Invalid stack setting map - config/secrets maps should be a map of maps.
+      Invalid stack settings map - config/secrets maps should be a map of maps.
       The top-level map keys represent Pulumi namespaces on which the key-value pairs
       in that namespace's nested map are set.

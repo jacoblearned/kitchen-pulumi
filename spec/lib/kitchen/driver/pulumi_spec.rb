@@ -67,6 +67,17 @@ describe ::Kitchen::Driver::Pulumi do
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
     end
+
+    it 'should raise an error for invalid config/secret maps' do
+      in_tmp_project_dir('test-project') do
+        invalid_config = { "test-project": ['must be a hash, not an array'] }
+
+        expect { configure_driver(stack: stack_name, config: invalid_config) }
+          .to raise_error(::Kitchen::UserError, /should be a map of maps/)
+        expect { configure_driver(stack: stack_name, secrets: invalid_config) }
+          .to raise_error(::Kitchen::UserError, /should be a map of maps/)
+      end
+    end
   end
 
   context '#provision' do

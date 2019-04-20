@@ -9,6 +9,7 @@ require 'kitchen/pulumi/config_attribute/config'
 require 'kitchen/pulumi/config_attribute/directory'
 require 'kitchen/pulumi/config_attribute/plugins'
 require 'kitchen/pulumi/config_attribute/private_cloud'
+require 'kitchen/pulumi/config_attribute/secrets'
 require 'kitchen/pulumi/config_attribute/stack'
 
 module Kitchen
@@ -24,6 +25,7 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::Directory
       include ::Kitchen::Pulumi::ConfigAttribute::Plugins
       include ::Kitchen::Pulumi::ConfigAttribute::PrivateCloud
+      include ::Kitchen::Pulumi::ConfigAttribute::Secrets
       include ::Kitchen::Pulumi::ConfigAttribute::Stack
 
       def create(_state)
@@ -31,8 +33,9 @@ module Kitchen
         stack = config_stack.empty? ? instance.suite.name : config_stack
         ppc = "--ppc #{config_private_cloud}" unless config_private_cloud.empty?
 
-        initialize_stack(stack: stack, ppc: ppc, dir: dir)
-        configure(stack: stack, dir: dir)
+        initialize_stack(stack, ppc, dir)
+        configure(config_config, stack, dir)
+        configure(config_secrets, stack, dir, is_secret: true)
       end
 
       def update(_state)
@@ -61,7 +64,7 @@ module Kitchen
         end
       end
 
-      def initialize_stack(stack:, ppc: '', dir: '.')
+      def initialize_stack(stack, ppc = '', dir = '.')
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "stack init #{stack} #{ppc} #{dir}",
           logger: logger,
@@ -72,11 +75,13 @@ module Kitchen
         end
       end
 
-      def configure(stack:, dir: '.')
-        config_config.each do |namespace, stack_settings|
-          stack_settings.each do |key, val|
+      def configure(config_hash, stack, dir = '.', is_secret: false)
+        secret = is_secret ? '--secret' : ''
+
+        config_hash.each do |ns, stack_settings|
+          stack_settings.each do |k, v|
             ::Kitchen::Pulumi::ShellOut.run(
-              cmd: "config set #{namespace}:#{key} #{val} -s #{stack} #{dir}",
+              cmd: "config set #{secret} #{ns}:#{k} #{v} -s #{stack} #{dir}",
               logger: logger,
             )
           end

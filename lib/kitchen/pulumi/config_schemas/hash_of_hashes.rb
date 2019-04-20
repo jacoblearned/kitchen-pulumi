@@ -12,7 +12,7 @@ module Kitchen
         end
       end
 
-      required(:value).filled(:hash?, :hash_of_hashes?)
+      required(:value).maybe(:hash?, :hash_of_hashes?)
     end
   end
 end

@@ -6,7 +6,7 @@ orbs:
 jobs:
   build_24: &build
     docker:
-      - image: circleci/ruby:2.4.6
+      - image: circleci/ruby:2.4.6-node
     steps:
       - checkout
 
@@ -28,7 +28,7 @@ jobs:
       - run: bundle exec rake lint
 
       # Run unit tests
-      - run: mkdir /tmp/test-results && bundle exec rake spec
+      - run: mkdir /tmp/test-results && bundle exec rake npm_install && bundle exec rake spec
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
@@ -38,12 +38,12 @@ jobs:
   build_25:
     <<: *build
     docker:
-      - image: circleci/ruby:2.5.5
+      - image: circleci/ruby:2.5.5-node
 
   build_26:
     <<: *build
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: circleci/ruby:2.6.2-node
 
 
 workflows:

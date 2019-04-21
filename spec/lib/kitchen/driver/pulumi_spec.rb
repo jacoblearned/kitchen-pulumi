@@ -33,6 +33,7 @@ describe ::Kitchen::Driver::Pulumi do
                        private_cloud: '',
                        plugins: [],
                        config: {},
+                       config_file: '',
                        secrets: {})
     driver_config = {
       kitchen_root: kitchen_root,
@@ -41,6 +42,7 @@ describe ::Kitchen::Driver::Pulumi do
       private_cloud: private_cloud,
       plugins: plugins,
       config: config,
+      config_file: config_file,
       secrets: secrets,
     }
 
@@ -68,6 +70,15 @@ describe ::Kitchen::Driver::Pulumi do
       end
     end
 
+    it 'should allow custom config files' do
+      in_tmp_project_dir('test-project') do
+        config_file = 'custom-test-config-file.yaml'
+        driver = configure_driver(stack: stack_name, config_file: config_file)
+        expect { driver.create({}) }
+          .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
+      end
+    end
+
     it 'should raise an error for invalid config/secret maps' do
       in_tmp_project_dir('test-project') do
         invalid_config = { "test-project": ['must be a hash, not an array'] }
@@ -80,15 +91,17 @@ describe ::Kitchen::Driver::Pulumi do
     end
   end
 
-  context '#provision' do
+  context '#update' do
     it 'should update a stack' do
       in_tmp_project_dir('test-project') do
-        config = { 'test-project': { bucket_name: bucket_name } }
+        config = { 'test-project': { foo: 'bar' } }
         secrets = { 'test-project': { ssh_key: 'ShouldBeSecret' } }
+        config_file = 'custom-stack-config-file.yaml'
 
         driver = configure_driver(
           stack: stack_name,
           config: config,
+          config_file: config_file,
           secrets: secrets,
         )
 
@@ -97,7 +110,10 @@ describe ::Kitchen::Driver::Pulumi do
           driver.update({})
           driver.update({})
         end
+
         expected.to output(/Stack test-project-#{stack_name} created/)
+          .to_stdout_from_any_process
+        expected.to output(/bucket_name: kitchen-pulumi-custom-conf-file/)
           .to_stdout_from_any_process
         expected.to output(/ssh_key:\s+\[secret\]/).to_stdout_from_any_process
       end

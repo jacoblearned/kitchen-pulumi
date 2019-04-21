@@ -9,11 +9,10 @@ suites:
   - name: test-project-dev-west
     driver:
       stack: dev-west
+      config_file: custom-stack-config-file.yaml
       config:
         test-project:
-          bucket_name: kitchen-pulumi-8009408424
-        aws:
-          region: us-west-2
+          foo: bar
 
   - name: test-project-dev-east
     driver:

@@ -1,0 +1,4 @@
+config:
+  aws:region: us-east-1
+  test-project:bucket_name: kitchen-pulumi-custom-conf-file
+  test-project:foo: bar

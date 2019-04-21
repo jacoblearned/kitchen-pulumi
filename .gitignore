@@ -1,5 +1,7 @@
 .kitchen/
 
+node_modules/
+
 *.gem
 *.rbc
 /.config

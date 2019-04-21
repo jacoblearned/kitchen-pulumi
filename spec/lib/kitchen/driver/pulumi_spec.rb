@@ -111,7 +111,9 @@ describe ::Kitchen::Driver::Pulumi do
           driver.update({})
         end
 
-        expected.to output(/Stack test-project-#{stack_name} created/)
+        expected.to output(/test-project-#{stack_name} creating/)
+          .to_stdout_from_any_process
+        expected.to output(/test-project-#{stack_name} refreshing/)
           .to_stdout_from_any_process
         expected.to output(/bucket_name: kitchen-pulumi-custom-conf-file/)
           .to_stdout_from_any_process

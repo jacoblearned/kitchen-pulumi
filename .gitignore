@@ -1,5 +1,7 @@
 .kitchen/
 
+node_modules/
+
 *.gem
 *.rbc
 /.config
@@ -50,3 +52,5 @@ build-iPhoneSimulator/
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+
+*.pyc

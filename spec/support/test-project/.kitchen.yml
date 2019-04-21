@@ -2,28 +2,29 @@
 driver:
   name: pulumi
 
+provisioner:
+  name: pulumi
+
 suites:
   - name: test-project-dev-west
     driver:
       stack: dev-west
+      config_file: custom-stack-config-file.yaml
       config:
-        - test-project:
-          - key: bucket_name
-            value: kitchen-pulumi-8009408424
-        - aws:
-          - key: region
-            value: us-west-2
+        test-project:
+          foo: bar
 
   - name: test-project-dev-east
     driver:
       stack: dev-east
       config:
-        - test-project:
-          - key: bucket_name
-            value: kitchen-pulumi-9089332077
-        - aws:
-          - key: region
-            value: us-east-1
+        test-project:
+          bucket_name: kitchen-pulumi-9089332077
+        aws:
+          region: us-east-1
+      secrets:
+        test-project:
+          ssh_key: foo
 
 platforms:
   - name: default

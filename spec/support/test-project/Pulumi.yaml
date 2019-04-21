@@ -1,3 +1,6 @@
 name: test-project
-description: test project for kitchen-pulumi
-runtime: python
+runtime:
+  name: nodejs
+  options:
+    typescript: false
+description: A minimal JavaScript Pulumi program

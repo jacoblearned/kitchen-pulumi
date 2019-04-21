@@ -11,7 +11,7 @@ module Kitchen
       # Module used for the 'config' instance var on an
       # instance driver. The driver will set the Pulumi stack
       # configs for each of the namespaces provided.
-      module Config
+      module Secrets
         def self.included(plugin)
           definer = ConfigAttributeDefiner.new(
             attribute: self,
@@ -21,12 +21,12 @@ module Kitchen
         end
 
         def self.to_sym
-          :config
+          :secrets
         end
 
         extend ConfigAttributeCacher
 
-        def config_config_default_value
+        def config_secrets_default_value
           {}
         end
       end

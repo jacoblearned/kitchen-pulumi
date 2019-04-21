@@ -43,9 +43,10 @@ module Kitchen
       def update(_state)
         stack = config_stack.empty? ? instance.suite.name : config_stack
         dir = "-C #{config_directory}"
+        conf_file = config_file
 
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "up -y -r --show-config -s #{stack} #{dir}",
+          cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
           logger: logger,
         )
       end
@@ -79,12 +80,7 @@ module Kitchen
 
       def configure(stack_settings_hash, stack, dir = '', is_secret: false)
         secret = is_secret ? '--secret' : ''
-        conf_file = if File.directory?(config_config_file)
-                      ''
-                    else
-                      "--config-file #{config_config_file}"
-                    end
-        base_cmd = "config set #{secret} -s #{stack} #{dir} #{conf_file}"
+        base_cmd = "config set #{secret} -s #{stack} #{dir} #{config_file}"
 
         stack_settings_hash.each do |namespace, stack_settings|
           stack_settings.each do |key, val|
@@ -94,6 +90,13 @@ module Kitchen
             )
           end
         end
+      end
+
+      def config_file
+        file = config_config_file
+        return '' if File.directory?(file) || file.empty?
+
+        "--config-file #{file}"
       end
     end
   end

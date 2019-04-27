@@ -18,7 +18,12 @@ end
 desc 'Integration tests'
 task :integration_test do
   Dir.chdir('spec/support/test-project')
-  sh 'kitchen test'
+  begin
+    sh 'kitchen test'
+  ensure
+    # Remove intermediate config files
+    sh 'rm Pulumi.*.yaml'
+  end
 end
 
 task :npm_install do

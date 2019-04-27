@@ -1,6 +1,0 @@
-encryptionsalt: v1:D976zQI5brk=:v1:iwQmxvqSOFxVsDbb:u11P9KOUGzbffKwPKXNyC04jrnBAEw==
-config:
-  aws:region: us-east-1
-  test-project:bucket_name: kitchen-pulumi-9089332077
-  test-project:ssh_key:
-    secure: AAABAAZ4vgh/a9LNImNBaIg9PxNzbdelKExAziyEIeKNIyo=

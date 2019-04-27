@@ -9,7 +9,7 @@ suites:
   - name: test-project-dev-west
     driver:
       backend: local
-      stack: dev-west
+      stack: <%= "dev-west-#{rand(10**10)}" %>
       config_file: custom-stack-config-file.yaml
       config:
         test-project:
@@ -17,7 +17,7 @@ suites:
 
   - name: test-project-dev-east
     driver:
-      stack: dev-east
+      stack: <%= "dev-west-#{rand(10**10)}" %>
       config:
         test-project:
           bucket_name: kitchen-pulumi-9089332077

@@ -70,8 +70,9 @@ module Kitchen
       end
 
       def login
+        backend = config_backend == 'local' ? '--local' : config_backend
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "login #{config_backend}",
+          cmd: "login #{backend}",
           logger: logger,
         )
       end

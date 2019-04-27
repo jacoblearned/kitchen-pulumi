@@ -3,4 +3,4 @@ config:
   aws:region: us-east-1
   test-project:bucket_name: kitchen-pulumi-9089332077
   test-project:ssh_key:
-    secure: AAABAHXSAHFyReniwQ5XrIYEf1y9YI/HBEx6N7QzXtnZinY=
+    secure: AAABAAZ4vgh/a9LNImNBaIg9PxNzbdelKExAziyEIeKNIyo=

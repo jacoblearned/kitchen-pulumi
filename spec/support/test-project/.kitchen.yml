@@ -8,6 +8,7 @@ provisioner:
 suites:
   - name: test-project-dev-west
     driver:
+      backend: local
       stack: dev-west
       config_file: custom-stack-config-file.yaml
       config:

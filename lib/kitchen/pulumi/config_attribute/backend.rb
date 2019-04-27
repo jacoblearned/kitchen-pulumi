@@ -8,8 +8,9 @@ require 'kitchen/pulumi/config_attribute_definer'
 module Kitchen
   module Pulumi
     module ConfigAttribute
-      # Attribute used to specify the Pulumi Private Cloud URL for a stack
-      module PrivateCloud
+      # Attribute used to specify the Pulumi backend to use.
+      # It contains the URL to the backend, local or remote
+      module Backend
         def self.included(plugin_class)
           definer = ConfigAttributeDefiner.new(
             attribute: self,
@@ -19,13 +20,13 @@ module Kitchen
         end
 
         def self.to_sym
-          :private_cloud
+          :backend
         end
 
         extend ConfigAttributeCacher
 
-        def config_private_cloud_default_value
-          ''
+        def config_backend_default_value
+          'https://api.pulumi.com'
         end
       end
     end

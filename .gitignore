@@ -1,3 +1,7 @@
+# Pulumi config backup files
+*.bak
+
+# Test Kitchen state/logs
 .kitchen/
 
 node_modules/

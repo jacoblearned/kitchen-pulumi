@@ -35,6 +35,9 @@ jobs:
           path: /tmp/test-results
           destination: test-results
 
+      # Run integration tests
+      - run: bundle exec rake integration_test
+
   build_25:
     <<: *build
     docker:

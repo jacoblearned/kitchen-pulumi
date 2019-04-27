@@ -18,7 +18,7 @@ end
 desc 'Integration tests'
 task :integration_test do
   Dir.chdir('spec/support/test-project')
-  sh 'bundle exec kitchen test'
+  sh 'kitchen test'
 end
 
 task :npm_install do

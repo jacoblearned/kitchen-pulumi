@@ -9,7 +9,7 @@ require 'kitchen/pulumi/config_attribute/config'
 require 'kitchen/pulumi/config_attribute/config_file'
 require 'kitchen/pulumi/config_attribute/directory'
 require 'kitchen/pulumi/config_attribute/plugins'
-require 'kitchen/pulumi/config_attribute/private_cloud'
+require 'kitchen/pulumi/config_attribute/backend'
 require 'kitchen/pulumi/config_attribute/secrets'
 require 'kitchen/pulumi/config_attribute/stack'
 
@@ -26,16 +26,16 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::ConfigFile
       include ::Kitchen::Pulumi::ConfigAttribute::Directory
       include ::Kitchen::Pulumi::ConfigAttribute::Plugins
-      include ::Kitchen::Pulumi::ConfigAttribute::PrivateCloud
+      include ::Kitchen::Pulumi::ConfigAttribute::Backend
       include ::Kitchen::Pulumi::ConfigAttribute::Secrets
       include ::Kitchen::Pulumi::ConfigAttribute::Stack
 
       def create(_state)
         dir = "-C #{config_directory}"
         stack = config_stack.empty? ? instance.suite.name : config_stack
-        ppc = "--ppc #{config_private_cloud}" unless config_private_cloud.empty?
 
-        initialize_stack(stack, ppc, dir)
+        login
+        initialize_stack(stack, dir)
         configure(config_config, stack, dir)
         configure(config_secrets, stack, dir, is_secret: true)
       end
@@ -45,6 +45,7 @@ module Kitchen
         dir = "-C #{config_directory}"
         conf_file = config_file
 
+        login
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
           logger: logger,
@@ -60,6 +61,7 @@ module Kitchen
           "stack rm --preserve-config -y -s #{stack} #{dir}",
         ]
 
+        login
         ::Kitchen::Pulumi::ShellOut.run(cmd: cmds, logger: logger)
       rescue ::Kitchen::Pulumi::Error => e
         if e.message.match?(/no stack named '#{stack}' found/)
@@ -67,9 +69,17 @@ module Kitchen
         end
       end
 
-      def initialize_stack(stack, ppc = '', dir = '')
+      def login
+        backend = config_backend == 'local' ? '--local' : config_backend
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "stack init #{stack} #{ppc} #{dir}",
+          cmd: "login #{backend}",
+          logger: logger,
+        )
+      end
+
+      def initialize_stack(stack, dir = '')
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "stack init #{stack} #{dir}",
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e

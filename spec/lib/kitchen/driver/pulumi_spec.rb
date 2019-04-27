@@ -30,7 +30,7 @@ describe ::Kitchen::Driver::Pulumi do
   def configure_driver(directory: '.',
                        kitchen_root: '.',
                        stack: '',
-                       private_cloud: '',
+                       backend: '',
                        plugins: [],
                        config: {},
                        config_file: '',
@@ -39,7 +39,7 @@ describe ::Kitchen::Driver::Pulumi do
       kitchen_root: kitchen_root,
       directory: directory,
       stack: stack.empty? ? "kitchen-pulumi-test-#{rand(10**10)}" : stack,
-      private_cloud: private_cloud,
+      backend: backend,
       plugins: plugins,
       config: config,
       config_file: config_file,
@@ -65,6 +65,22 @@ describe ::Kitchen::Driver::Pulumi do
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
         driver = configure_driver(stack: stack_name)
+        expect { driver.create({}) }
+          .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
+      end
+    end
+
+    it 'should allow local backends' do
+      in_tmp_project_dir('test-project') do
+        driver = configure_driver(stack: stack_name, backend: 'file://~')
+        expect { driver.create({}) }
+          .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
+      end
+    end
+
+    it 'should allow local backend with convenient name "local"' do
+      in_tmp_project_dir('test-project') do
+        driver = configure_driver(stack: stack_name, backend: 'local')
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end

@@ -34,7 +34,8 @@ describe ::Kitchen::Driver::Pulumi do
                        plugins: [],
                        config: {},
                        config_file: '',
-                       secrets: {})
+                       secrets: {},
+                       refresh_config: false)
     driver_config = {
       kitchen_root: kitchen_root,
       directory: directory,
@@ -44,6 +45,7 @@ describe ::Kitchen::Driver::Pulumi do
       config: config,
       config_file: config_file,
       secrets: secrets,
+      refresh_config: refresh_config,
     }
 
     driver = described_class.new(driver_config)
@@ -119,6 +121,7 @@ describe ::Kitchen::Driver::Pulumi do
           config: config,
           config_file: config_file,
           secrets: secrets,
+          refresh_config: true,
         )
 
         expected = expect do

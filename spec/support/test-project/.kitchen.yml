@@ -11,6 +11,7 @@ suites:
       backend: local
       stack: <%= "dev-west-#{rand(10**10)}" %>
       config_file: custom-stack-config-file.yaml
+      refresh_config: true
       config:
         test-project:
           foo: bar

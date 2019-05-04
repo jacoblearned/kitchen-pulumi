@@ -12,6 +12,7 @@ require 'kitchen/pulumi/config_attribute/plugins'
 require 'kitchen/pulumi/config_attribute/backend'
 require 'kitchen/pulumi/config_attribute/secrets'
 require 'kitchen/pulumi/config_attribute/stack'
+require 'kitchen/pulumi/config_attribute/refresh_config'
 
 module Kitchen
   module Driver
@@ -29,6 +30,7 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::Backend
       include ::Kitchen::Pulumi::ConfigAttribute::Secrets
       include ::Kitchen::Pulumi::ConfigAttribute::Stack
+      include ::Kitchen::Pulumi::ConfigAttribute::RefreshConfig
 
       def create(_state)
         dir = "-C #{config_directory}"
@@ -46,6 +48,7 @@ module Kitchen
         conf_file = config_file
 
         login
+        refresh_config(stack, dir) if config_refresh_config
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
           logger: logger,
@@ -100,6 +103,15 @@ module Kitchen
             )
           end
         end
+      end
+
+      def refresh_config(stack, dir = '')
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "config refresh -s #{stack} #{dir} #{config_file}",
+          logger: logger,
+        )
+      rescue ::Kitchen::Pulumi::Error => e
+        puts 'Continuing...' if e.message.match?(/no previous deployment/)
       end
 
       def config_file

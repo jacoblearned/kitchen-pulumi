@@ -15,6 +15,12 @@ suites:
       config:
         test-project:
           foo: bar
+      stack_evolution:
+        - config:
+            test-project:
+              foo: new-value
+        - config_file: custom-stack-config-file.yaml
+
 
   - name: test-project-dev-east
     driver:
@@ -27,6 +33,14 @@ suites:
       secrets:
         test-project:
           ssh_key: foo
+      stack_evolution:
+        - config_file: custom-stack-config-file.yaml
+        - config:
+            test-project:
+              foo: takes-precedence-over-config-file
+          secrets:
+            test-project:
+              access_key: access.pem
 
 platforms:
   - name: default

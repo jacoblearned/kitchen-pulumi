@@ -12,6 +12,7 @@ require 'kitchen/pulumi/config_attribute/plugins'
 require 'kitchen/pulumi/config_attribute/backend'
 require 'kitchen/pulumi/config_attribute/secrets'
 require 'kitchen/pulumi/config_attribute/stack'
+require 'kitchen/pulumi/config_attribute/stack_evolution'
 require 'kitchen/pulumi/config_attribute/refresh_config'
 
 module Kitchen
@@ -30,34 +31,34 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::Backend
       include ::Kitchen::Pulumi::ConfigAttribute::Secrets
       include ::Kitchen::Pulumi::ConfigAttribute::Stack
+      include ::Kitchen::Pulumi::ConfigAttribute::StackEvolution
       include ::Kitchen::Pulumi::ConfigAttribute::RefreshConfig
 
       def create(_state)
         dir = "-C #{config_directory}"
         stack = config_stack.empty? ? instance.suite.name : config_stack
-
-        login
-        initialize_stack(stack, dir)
-        configure(config_config, stack, dir)
-        configure(config_secrets, stack, dir, is_secret: true)
-      end
-
-      def update(_state)
-        stack = config_stack.empty? ? instance.suite.name : config_stack
-        dir = "-C #{config_directory}"
         conf_file = config_file
 
         login
-        refresh_config(stack, dir) if config_refresh_config
-        ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
-          logger: logger,
-        )
+        initialize_stack(stack, dir)
+        configure(config_config, stack, dir, conf_file)
+        configure(config_secrets, stack, dir, conf_file, is_secret: true)
+      end
+
+      def update(_state)
+        dir = "-C #{config_directory}"
+        stack = config_stack.empty? ? instance.suite.name : config_stack
+        conf_file = config_file
+
+        login
+        refresh_config(stack, dir, conf_file) if config_refresh_config
+        update_stack(stack, dir, conf_file)
+        evolve_stack(stack, dir) unless config_stack_evolution.empty?
       end
 
       def destroy(_state)
-        stack = config_stack.empty? ? instance.suite.name : config_stack
         dir = "-C #{config_directory}"
+        stack = config_stack.empty? ? instance.suite.name : config_stack
 
         cmds = [
           "destroy -y -r --show-config -s #{stack} #{dir}",
@@ -91,11 +92,11 @@ module Kitchen
         end
       end
 
-      def configure(stack_settings_hash, stack, dir = '', is_secret: false)
+      def configure(stack_confs, stack, conf_file, dir = '', is_secret: false)
         secret = is_secret ? '--secret' : ''
-        base_cmd = "config set #{secret} -s #{stack} #{dir} #{config_file}"
+        base_cmd = "config set #{secret} -s #{stack} #{dir} #{conf_file}"
 
-        stack_settings_hash.each do |namespace, stack_settings|
+        stack_confs.each do |namespace, stack_settings|
           stack_settings.each do |key, val|
             ::Kitchen::Pulumi::ShellOut.run(
               cmd: "#{base_cmd} #{namespace}:#{key} #{val}",
@@ -105,20 +106,39 @@ module Kitchen
         end
       end
 
-      def refresh_config(stack, dir = '')
+      def refresh_config(stack, conf_file, dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "config refresh -s #{stack} #{dir} #{config_file}",
+          cmd: "config refresh -s #{stack} #{dir} #{conf_file}",
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e
         puts 'Continuing...' if e.message.match?(/no previous deployment/)
       end
 
-      def config_file
-        file = config_config_file
+      def config_file(conf_file = '')
+        file = conf_file.empty? ? config_config_file : conf_file
         return '' if File.directory?(file) || file.empty?
 
         "--config-file #{file}"
+      end
+
+      def update_stack(stack, conf_file, dir = '')
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
+          logger: logger,
+        )
+      end
+
+      def evolve_stack(stack, dir = '')
+        config_stack_evolution.each do |evolution|
+          conf_file = config_file(evolution.fetch(:config_file, ''))
+          new_stack_confs = evolution.fetch(:config, {})
+          new_stack_secrets = evolution.fetch(:secrets, {})
+
+          configure(new_stack_confs, stack, conf_file, dir)
+          configure(new_stack_secrets, stack, conf_file, dir, is_secret: true)
+          update_stack(stack, conf_file, dir)
+        end
       end
     end
   end

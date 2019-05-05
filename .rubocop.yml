@@ -7,6 +7,8 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
+Metrics/ClassLength:
+  Max: 125
 Metrics/MethodLength:
   Max: 15
 Metrics/AbcSize:

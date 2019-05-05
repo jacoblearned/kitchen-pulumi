@@ -6,6 +6,7 @@ require 'kitchen/driver/pulumi'
 
 # rubocop:disable Metrics/ParameterLists
 # rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/MethodLength
 describe ::Kitchen::Driver::Pulumi do
   let(:stack_name) { "test-stack-#{rand(10**10)}" }
   let(:bucket_name) { 'foo-bucket' }
@@ -35,7 +36,8 @@ describe ::Kitchen::Driver::Pulumi do
                        config: {},
                        config_file: '',
                        secrets: {},
-                       refresh_config: false)
+                       refresh_config: false,
+                       stack_evolution: [])
     driver_config = {
       kitchen_root: kitchen_root,
       directory: directory,
@@ -46,6 +48,7 @@ describe ::Kitchen::Driver::Pulumi do
       config_file: config_file,
       secrets: secrets,
       refresh_config: refresh_config,
+      stack_evolution: stack_evolution,
     }
 
     driver = described_class.new(driver_config)
@@ -115,6 +118,15 @@ describe ::Kitchen::Driver::Pulumi do
         config = { 'test-project': { foo: 'bar' } }
         secrets = { 'test-project': { ssh_key: 'ShouldBeSecret' } }
         config_file = 'custom-stack-config-file.yaml'
+        stack_evolution = [
+          {
+            config: { 'test-project': { foo: 'newfoo' } },
+            secrets: { 'test-project': { ssh_key: 'NewSecret' } },
+          },
+          {
+            config_file: 'stack-evolution.yaml',
+          },
+        ]
 
         driver = configure_driver(
           stack: stack_name,
@@ -122,11 +134,11 @@ describe ::Kitchen::Driver::Pulumi do
           config_file: config_file,
           secrets: secrets,
           refresh_config: true,
+          stack_evolution: stack_evolution,
         )
 
         expected = expect do
           driver.create({})
-          driver.update({})
           driver.update({})
         end
 
@@ -164,3 +176,4 @@ describe ::Kitchen::Driver::Pulumi do
 end
 # rubocop:enable Metrics/ParameterLists
 # rubocop:enable Metrics/BlockLength
+# rubocop:enable Metrics/MethodLength

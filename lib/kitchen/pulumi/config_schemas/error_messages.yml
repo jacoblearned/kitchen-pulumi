@@ -5,3 +5,17 @@ en:
       Invalid stack settings map - config/secrets maps should be a map of maps.
       The top-level map keys represent Pulumi namespaces on which the key-value pairs
       in that namespace's nested map are set.
+
+    config_evolution_items_valid_types?: >
+      Invalid stack evolution list - Stack evolutions must be a list whose map-type items contain at
+      least one of three values --- 1. 'config_file' - String specifying path to config file to use for this update.
+      2. 'config' - A map of maps in which the top-level map keys represent Pulumi namespaces on which the key-value pairs
+      in that namespace's nested map are set. 3. 'secrets' -- A map with the same structure as 'config', but whose values
+      will be set as secrets on your stack.
+
+    config_evolution_array_item_valid?: >
+      Invalid stack evolution list - Stack evolutions must be a list whose map-type items contain at
+      least one of three values --- 1. 'config_file' - String specifying path to config file to use for this update.
+      2. 'config' - A map of maps in which the top-level map keys represent Pulumi namespaces on which the key-value pairs
+      in that namespace's nested map are set. 3. 'secrets' -- A map with the same structure as 'config', but but whose values
+      will be set as secrets on your stack.

@@ -16,7 +16,7 @@ DESC
   spec.email = ['jacobmlearned@gmail.com']
   spec.homepage = 'https://github.com/jacoblearned/kitchen-pulumi'
   spec.summary = 'Test-Kitchen plugins for Pulumi projects'
-  spec.files = Dir.glob('{lib/**/*.rb,README.md}')
+  spec.files = Dir.glob('{lib/**/*.rb,lib/**/*.yml,README.md}')
   spec.license = 'MIT'
   spec.description = desc
 

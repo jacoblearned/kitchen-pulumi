@@ -99,7 +99,7 @@ module Kitchen
         stack_confs.each do |namespace, stack_settings|
           stack_settings.each do |key, val|
             ::Kitchen::Pulumi::ShellOut.run(
-              cmd: "#{base_cmd} #{namespace}:#{key} #{val}",
+              cmd: "#{base_cmd} #{namespace}:#{key} \"#{val}\"",
               logger: logger,
             )
           end

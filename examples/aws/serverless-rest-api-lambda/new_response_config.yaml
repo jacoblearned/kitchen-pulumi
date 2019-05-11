@@ -1,0 +1,3 @@
+config:
+  aws:region: us-east-1
+  serverless-rest-api-lambda:api_response_text: hello, kitchen pulumi

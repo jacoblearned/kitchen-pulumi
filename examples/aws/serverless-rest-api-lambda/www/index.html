@@ -8,11 +8,11 @@
 <body>
     <p>Hello, world!</p>
     <p>Made with ❤️ using <a href="https://pulumi.com">Pulumi</a></p>
-    <p>Served from: <span id="source"></span></p>
+    <p>API Response: <span id="response"></span></p>
 </body>
 <script>
-    fetch("source").then(response => response.json()).then(json => {
-        document.getElementById("source").innerText = json.name;
+    fetch("response").then(response => response.json()).then(json => {
+        document.getElementById("response").innerText = json.response;
     });
 </script>
 </html>

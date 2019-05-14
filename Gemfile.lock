@@ -177,7 +177,7 @@ GEM
     mime-types (3.2.2)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2019.0331)
-    mixlib-install (3.11.12)
+    mixlib-install (3.11.18)
       mixlib-shellout
       mixlib-versioning
       thor
@@ -276,7 +276,7 @@ GEM
     strings-ansi (0.1.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    test-kitchen (2.2.3)
+    test-kitchen (2.2.4)
       bcrypt_pbkdf (~> 1.0)
       ed25519 (~> 1.2)
       license-acceptance (~> 1.0, >= 1.0.5)

@@ -35,13 +35,18 @@ module Kitchen
 
       # #initialize prepares the instance to be used.
       #
+      # @param inputs [#to_hash] the config inputs provided to a stack
       # @param outputs [#to_hash] the outputs of the Pulumi stack under test.
       def initialize(inputs:, outputs:)
         @inputs = inputs.map do |key, value|
-          ["input_#{key}", value]
-        end.to_h
-        @outputs = Hash[outputs].map do |key, value|
           [key, value.fetch('value')]
+        end.to_h
+        @inputs.merge(@inputs.map do |key, value|
+          ["input_#{key}", value]
+        end.to_h)
+
+        @outputs = Hash[outputs].map do |key, value|
+          [key, value]
         end.to_h
         @outputs.merge!(@outputs.map do |key, value|
           ["output_#{key}", value]

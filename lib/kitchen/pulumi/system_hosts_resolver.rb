@@ -16,7 +16,7 @@ module Kitchen
       # @raise [::Kitchen::Pulumi::Error] if the fetching the value of the
       #   output fails.
       def resolve(hosts_output:, system:)
-        system.add_hosts hosts: @outputs.fetch(hosts_output).fetch('value')
+        system.add_hosts hosts: @outputs.fetch(hosts_output)
       rescue ::KeyError => e
         raise ::Kitchen::Pulumi::Error, "Resolving hosts failed\n#{e}"
       end

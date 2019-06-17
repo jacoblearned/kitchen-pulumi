@@ -5,3 +5,4 @@ const config = new pulumi.Config("test-project");
 const bucketName = config.require("bucket_name");
 
 console.log(bucketName);
+exports.bucketName = bucketName;

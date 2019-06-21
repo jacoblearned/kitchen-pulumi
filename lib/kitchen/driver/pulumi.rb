@@ -70,9 +70,7 @@ module Kitchen
         login
         ::Kitchen::Pulumi::ShellOut.run(cmd: cmds, logger: logger)
       rescue ::Kitchen::Pulumi::Error => e
-        if e.message.match?(/no stack named '#{stack}' found/)
-          puts 'Continuing...'
-        end
+        puts 'Continuing...' if e.message.match?(/no stack named '#{stack}' found/)
       end
 
       def login
@@ -89,9 +87,7 @@ module Kitchen
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e
-        if e.message.match?(/stack '#{stack}' already exists/)
-          puts 'Continuing...'
-        end
+        puts 'Continuing...' if e.message.match?(/stack '#{stack}' already exists/)
       end
 
       def configure(stack_confs, stack, conf_file, dir = '', is_secret: false)

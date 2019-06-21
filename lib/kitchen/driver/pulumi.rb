@@ -5,6 +5,8 @@ require 'kitchen/driver/base'
 require 'kitchen/pulumi/error'
 require 'kitchen/pulumi/shell_out'
 require 'kitchen/pulumi/configurable'
+require 'kitchen/pulumi/command/input'
+require 'kitchen/pulumi/command/output'
 require 'kitchen/pulumi/config_attribute/config'
 require 'kitchen/pulumi/config_attribute/config_file'
 require 'kitchen/pulumi/config_attribute/directory'
@@ -68,9 +70,7 @@ module Kitchen
         login
         ::Kitchen::Pulumi::ShellOut.run(cmd: cmds, logger: logger)
       rescue ::Kitchen::Pulumi::Error => e
-        if e.message.match?(/no stack named '#{stack}' found/)
-          puts 'Continuing...'
-        end
+        puts 'Continuing...' if e.message.match?(/no stack named '#{stack}' found/)
       end
 
       def login
@@ -87,9 +87,7 @@ module Kitchen
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e
-        if e.message.match?(/stack '#{stack}' already exists/)
-          puts 'Continuing...'
-        end
+        puts 'Continuing...' if e.message.match?(/stack '#{stack}' already exists/)
       end
 
       def configure(stack_confs, stack, conf_file, dir = '', is_secret: false)
@@ -139,6 +137,33 @@ module Kitchen
           configure(new_stack_secrets, stack, conf_file, dir, is_secret: true)
           update_stack(stack, conf_file, dir)
         end
+      end
+
+      def stack_inputs(&block)
+        ::Kitchen::Pulumi::Command::Input.run(
+          directory: config_directory,
+          stack: config_stack,
+          conf_file: config_file,
+          logger: logger,
+          &block
+        )
+
+        self
+      rescue ::Kitchen::Pulumi::Error => e
+        raise ::Kitchen::ActionFailed, e.message
+      end
+
+      def stack_outputs(&block)
+        ::Kitchen::Pulumi::Command::Output.run(
+          directory: config_directory,
+          stack: config_stack,
+          logger: logger,
+          &block
+        )
+
+        self
+      rescue ::Kitchen::Pulumi::Error => e
+        raise ::Kitchen::ActionFailed, e.message
       end
     end
   end

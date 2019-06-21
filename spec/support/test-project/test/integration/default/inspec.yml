@@ -1,0 +1,14 @@
+name: default
+attributes:
+  - name: input_test-project:bucket_name
+    type: string
+    required: true
+  - name: test-project:bucket_name
+    type: string
+    required: true
+  - name: bucketName
+    type: string
+    required: true
+  - name: output_bucketName
+    type: string
+    required: true

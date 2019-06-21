@@ -5,7 +5,13 @@ driver:
 provisioner:
   name: pulumi
 
-suites:
+verifier:
+  name: pulumi
+  systems:
+    - name: test system
+      backend: local
+
+platforms:
   - name: test-project-dev-west
     driver:
       backend: local
@@ -42,5 +48,5 @@ suites:
             test-project:
               access_key: access.pem
 
-platforms:
+suites:
   - name: default

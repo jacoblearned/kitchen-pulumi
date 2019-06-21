@@ -5,7 +5,7 @@ require 'kitchen/pulumi/config_schemas/systems'
 
 module Kitchen
   module Pulumi
-    class ConfigAttribute
+    module ConfigAttribute
       # {include:Kitchen::Pulumi::ConfigSchemas::Systems}
       #
       # If the +systems+ key is omitted then no tests will be executed.

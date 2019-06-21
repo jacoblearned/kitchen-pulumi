@@ -25,7 +25,7 @@ module Kitchen
 
         extend ConfigAttributeCacher
 
-        def config_fail_fast_default_value
+        def config_color_default_value
           ::Kitchen.tty?
         end
       end

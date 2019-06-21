@@ -143,11 +143,13 @@ module Kitchen
         end
       end
 
-      def stack_inputs
+      def stack_inputs(&block)
         ::Kitchen::Pulumi::Command::Input.run(
           directory: config_directory,
           stack: config_stack,
           conf_file: config_file,
+          logger: logger,
+          &block
         )
 
         self
@@ -155,10 +157,12 @@ module Kitchen
         raise ::Kitchen::ActionFailed, e.message
       end
 
-      def stack_outputs
+      def stack_outputs(&block)
         ::Kitchen::Pulumi::Command::Output.run(
           directory: config_directory,
           stack: config_stack,
+          logger: logger,
+          &block
         )
 
         self

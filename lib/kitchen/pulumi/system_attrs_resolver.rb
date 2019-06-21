@@ -39,9 +39,9 @@ module Kitchen
       # @param outputs [#to_hash] the outputs of the Pulumi stack under test.
       def initialize(inputs:, outputs:)
         @inputs = inputs.map do |key, value|
-          [key, value.fetch('value')]
+          [key, value.fetch('value', nil)]
         end.to_h
-        @inputs.merge(@inputs.map do |key, value|
+        @inputs.merge!(@inputs.map do |key, value|
           ["input_#{key}", value]
         end.to_h)
 

@@ -26,7 +26,7 @@ module Kitchen
         extend ConfigAttributeCacher
 
         def config_backend_default_value
-          ''
+          'https://api.pulumi.com'
         end
       end
     end

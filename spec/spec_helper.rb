@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'simplecov'
+SimpleCov.start
+
 def in_tmp_dir
   Dir.mktmpdir do |dir|
     Dir.chdir(dir) do

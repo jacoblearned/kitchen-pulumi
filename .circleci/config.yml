@@ -27,13 +27,39 @@ jobs:
       # Lint
       - run: bundle exec rake lint
 
+
+      - run:
+          name: Install Code Climate Test Reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+
       # Run unit tests
-      - run: mkdir /tmp/test-results && bundle exec rake npm_install && bundle exec rake spec
+      - run:
+          name: Install Code Climate Test Reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: Run Tests
+          command: |
+            mkdir /tmp/test-results
+            ./cc-test-reporter before-build
+            bundle exec rake npm_install && bundle exec rake spec
+      - run:
+          name: Code Climate Test Coverage
+          command: |
+            ./cc-test-reporter format-coverage -t simplecov -o "coverage/codeclimate.$CIRCLE_NODE_INDEX.json"
+
+      # collect reports
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
           destination: test-results
+      - deploy:
+          command: |
+            ./cc-test-reporter sum-coverage --output - --parts $CIRCLE_NODE_TOTAL coverage/codeclimate.*.json | ./cc-test-reporter upload-coverage --debug --input -
 
       # Run integration tests
       - run: bundle exec rake integration_test
@@ -47,7 +73,6 @@ jobs:
     <<: *build
     docker:
       - image: circleci/ruby:2.6.2-node
-
 
 workflows:
   build:

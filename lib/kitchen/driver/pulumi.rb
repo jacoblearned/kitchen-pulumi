@@ -70,7 +70,11 @@ module Kitchen
         login
         ::Kitchen::Pulumi::ShellOut.run(cmd: cmds, logger: logger)
       rescue ::Kitchen::Pulumi::Error => e
-        puts 'Continuing...' if e.message.match?(/no stack named '#{stack}' found/)
+        if e.message.match?(/no stack named '#{stack}' found/) || (
+          e.message.match?(/failed to load checkpoint/) && config_backend == 'local'
+        )
+          puts "Stack '#{stack}' does not exist, continuing..."
+        end
       end
 
       def login

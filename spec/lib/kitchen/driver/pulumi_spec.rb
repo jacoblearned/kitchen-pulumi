@@ -158,10 +158,14 @@ describe ::Kitchen::Driver::Pulumi do
       in_tmp_project_dir('test-project') do
         config = { 'test-project': { bucket_name: bucket_name } }
 
-        driver = configure_driver(stack: stack_name, config: config)
+        driver = configure_driver(
+          stack: stack_name,
+          config: config,
+          backend: 'https://api.pulumi.com',
+        )
 
         expect { driver.destroy({}) }
-          .to output(/no stack named '#{stack_name}' found/)
+          .to output(/Stack '#{stack_name}' does not exist/)
           .to_stdout_from_any_process
 
         expect do

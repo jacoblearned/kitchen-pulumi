@@ -16,6 +16,15 @@ confidence in your infrastructure code before it hits production.
 Kitchen-Pulumi provides a Kitchen [driver](https://kitchen.ci/docs/drivers/), [provisioner](https://kitchen.ci/docs/provisioners/),
 and [verifier](https://kitchen.ci/docs/verifiers/) which collectively support the following features:
 
-* Language-agnostic: Create and test Pulumi stacks in any of their [supported languages](https://www.pulumi.com/docs/reference/languages/).
-* Backend-agnostic: Use the Pulumi SaaS backend, a local backend, or your organization's internal backend.
-* Configurable: Easily define/override stack config values in your `.kitchen.yml` file for flexible testing across environments or scenarios.
+* **Language-agnostic**: Create and test Pulumi stacks in any of their [supported languages](https://www.pulumi.com/docs/reference/languages/).
+* **Backend-agnostic**: Use the Pulumi SaaS backend, a local backend, or your organization's internal backend.
+* **Configurable**: Easily define/override stack config values in your `.kitchen.yml` file for flexible testing across environments or scenarios.
+* **Test changes over time**: Simulate changes in stack config values over time to test how your infrastructure reacts to ever-shifting user-provided values.
+* **Custom state verification**: Code any validation logic you desire, provided it can be ran within an [InSpec profile](https://www.inspec.io/docs/reference/profiles/).
+
+If there's a feature you would like to see in Kitchen-Pulumi, please create an issue with the suggested feature and its intended use case.
+
+## Quick Start
+
+Check out the [serverless-rest-api-lambda example](examples/aws/serverless-rest-api-lambda) and follow the instructions in its `README`.
+

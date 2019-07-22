@@ -29,3 +29,6 @@ If there's a feature you would like to see in Kitchen-Pulumi, please create an i
 
 Check out the [serverless-rest-api-lambda example](examples/aws/serverless-rest-api-lambda) and follow the instructions in its `README`.
 
+## Installation
+
+Kitchen-Pulumi is compatible with Ruby 2.4 and above.

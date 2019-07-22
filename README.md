@@ -8,7 +8,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/35afd25bac772504e2a0/maintainability)](https://codeclimate.com/github/jacoblearned/kitchen-pulumi/maintainability)
 
 Kitchen-Pulumi is a collection of [Test-Kitchen](https://kitchen.ci/) plugins for testing [Pulumi](https://www.pulumi.com/)-based cloud infrastructure projects.
-With Kitchen-Pulumi you can provision suites of ephemeral test stacks, verify they are in the correct state using [InSpec], and tear them down to gain
+With Kitchen-Pulumi you can provision suites of ephemeral test stacks, verify they are in the correct state using [InSpec](https://www.inspec.io/), and tear them down to gain
 confidence in your infrastructure code before it hits production.
 
 ## Features

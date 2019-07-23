@@ -42,13 +42,75 @@ as this tutorial will create live resources in your AWS account.
     ```text
     $ bundle exec kitchen list
     Instance                       Driver  Provisioner  Verifier  Transport  Last Action    Last Error
-    dev-stack-serverless-rest-api  Pulumi  Pulumi       Pulumi    Ssh        <Not Created>  <None>
+    dev-stack-serverless-rest-api  Pulumi  Pulumi       Busser    Ssh        <Not Created>  <None>
     ```
 
 ## Project Overview
 
-In our project directory, we have `Pulumi.yaml` which defines a Pulumi project named `serverless-rest-api-lambda` as well as
+In our project directory, we have `Pulumi.yaml` which defines a Node.js Pulumi project named `serverless-rest-api-lambda` as well as
 `Pulumi.dev.yaml` which defines two configuration values for our `dev` stack:
 
 * `aws:region` - our desired AWS region, `us-east-1`
 * `serverless-rest-api-lambda:api_response_text` - the response string that our API will return. For now it will be "default".
+
+Since we're using Node.js, let's download the `@pulumi/pulumi` and `@pulumi/awsx` Node packages listed in our `package.json`
+that our project depends on:
+
+```
+$ npm install
+```
+
+Our infra code is contained in `index.js` and sets up our API with two endpoints: one at `/` that serves the static content of the `www` directory,
+and a `/response` endpoint that will return the value of the `api_response_text` we set in our stack config:
+
+```javascript
+// Import the [pulumi/aws](https://pulumi.io/reference/pkg/nodejs/@pulumi/aws/index.html) package
+const pulumi = require("@pulumi/pulumi");
+const awsx = require("@pulumi/awsx");
+
+const config = new pulumi.Config();
+const responseText = config.require("api_response_text");
+
+// Create a public HTTP endpoint (using AWS APIGateway)
+const endpoint = new awsx.apigateway.API("hello", {
+  routes: [
+
+    // Serve static files from the `www` folder (using AWS S3)
+    {
+      path: "/",
+      localPath: "www"
+    },
+
+    // Serve a simple REST API on `GET /response` (using AWS Lambda)
+    {
+      path: "/response",
+      method: "GET",
+      eventHandler: (req, ctx, cb) => {
+        cb(undefined, {
+          statusCode: 200,
+          body: Buffer.from(
+            JSON.stringify({ response: responseText }),
+            "utf8"
+          ).toString("base64"),
+          isBase64Encoded: true,
+          headers: { "content-type": "application/json" }
+        });
+      }
+    }
+  ]
+});
+
+// Export the public URL for the HTTP service
+exports.url = endpoint.url;
+```
+
+If you create and provision this stack by executing `pulumi up --stack dev`, you can
+navigate to the exported URL value in your browser and see the index page of `www/`
+along with the response value "default" that we set in the stack config.
+
+Go ahead and destroy the stack for now if you have validated this in your browser:
+
+```text
+$ pulumi destroy -y
+```
+

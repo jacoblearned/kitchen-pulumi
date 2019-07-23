@@ -6,17 +6,10 @@ driver:
 provisioner:
   name: pulumi
 
-verifier:
-  name: pulumi
-
 suites:
   - name: dev-stack
     driver:
       stack: dev
-      stack_evolution:
-        # This stack evolution will update the stack after its initial
-        # update and change the API response text to 'hello, kitchen pulumi'
-        - config_file: new_response_config.yaml
 
 
 platforms:

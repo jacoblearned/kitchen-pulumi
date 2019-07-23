@@ -6,6 +6,9 @@ driver:
 provisioner:
   name: pulumi
 
+verifier:
+  name: pulumi
+
 suites:
   - name: dev-stack
     driver:

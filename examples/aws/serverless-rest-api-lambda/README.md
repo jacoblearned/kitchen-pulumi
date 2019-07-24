@@ -13,7 +13,7 @@ as this tutorial will create live resources in your AWS account.
 1. To get started, clone this repository and navigate to this directory:
 
     ```text
-    $ git clone https://github.com/jacoblearned/kitchen-pulumi
+    $ git clone https://github.com/<username>/kitchen-pulumi
     $ cd kitchen-pulumi/examples/aws/serverless-rest-api-lambda
     ```
 
@@ -114,3 +114,134 @@ Go ahead and destroy the stack for now if you have validated this in your browse
 $ pulumi destroy -y
 ```
 
+## Our first integration test
+
+For the first iteration of our integration test, we want to use Kitchen-Pulumi to
+simply create and destroy the stack infrastructure to ensure both operations are completed
+without error.
+
+Looking at `.kitchen.yml`, you will see that we have a single platform called `serverless-rest-api`
+and a single suite called `dev-stack`. Together this means we have a single [Kitchen instance](https://kitchen.ci/docs/getting-started/instances/)
+called `dev-stack-serverless-rest-api` that we can test against. You can verify this using `kitchen list`:
+
+```text
+$ bundle exec kitchen list
+Instance                       Driver  Provisioner  Verifier  Transport  Last Action    Last Error
+dev-stack-serverless-rest-api  Pulumi  Pulumi       Busser    Ssh        <Not Created>  <None>
+```
+
+### Driver Configuration
+
+Setting attributes on the driver is how we customize our integration tests.
+Currently, we set the driver's `stack` attribute to the value `dev`.
+This means that the `dev-stack` suite will run tests against the `dev` stack and
+use the config values set in `Pulumi.dev.yaml`.
+
+### Creating a Stack
+
+We can create our dev stack by running `kitchen create`:
+
+```text
+$ bundle exec kitchen create
+-----> Starting Kitchen (v2.2.5)
+-----> Creating <dev-stack-serverless-rest-api>...
+$$$$$$ Running pulumi login https://api.pulumi.com
+       Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
+$$$$$$ Running pulumi stack init dev -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       error: stack 'dev' already exists
+       Continuing...
+       Finished creating <dev-stack-serverless-rest-api> (0m2.78s).
+-----> Kitchen is finished. (0m3.56s)
+```
+
+You can see from the output that `kitchen create` does two things when using Kitchen-Pulumi's driver:
+
+1. It logs in to the Pulumi service.
+   By default it will be the SaaS backend but we'll cover how to override this a bit later.
+1. It ensures the stack exists by calling `pulumi stack init dev`. If the stack already exists, Kitchen-Pulumi simply continues without error.
+
+### Provisioning and Updating a Stack
+
+We can now provision our stack resources by running `kitchen converge`:
+
+```text
+$ bundle exec kitchen converge
+-----> Starting Kitchen (v2.2.5)
+-----> Converging <dev-stack-serverless-rest-api>...
+$$$$$$ Running pulumi login https://api.pulumi.com
+       Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
+$$$$$$ Running pulumi up -y -r --show-config -s dev  -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       Previewing update (dev):
+       Configuration:
+           aws:region: us-east-1
+           serverless-rest-api-lambda:api_response_text: default
+
+       ...
+       <A lot of output from the update preview and from the update execution>
+       ...
+
+       Outputs:
+           url: "https://abc1235foo.execute-api.us-east-1.amazonaws.com/stage/"
+
+       Resources:
+           14 unchanged
+
+       Duration: 7s
+
+       Permalink: https://app.pulumi.com/<username>/serverless-rest-api-lambda/dev/updates/8
+       Finished converging <dev-stack-serverless-rest-api> (0m19.56s).
+-----> Kitchen is finished. (0m20.31s)
+```
+
+Using the Kitchen-Pulumi's provisioner, calling `kitchen converge` will call `pulumi up` on the current stack set on the driver.
+
+You will also see another login to the Pulumi backend. This is because `kitchen` commands could run against the same stack from different
+machines or by different users in a variety of invocation order permutations, so Kitchen-Pulumi will
+attempt a login anytime a call to the Pulumi CLI is necessary.
+
+If you visit the `url` stack Output, you should see the index page and the "default" API response text.
+
+### Destroying the Stack
+
+Now that we have manually validated our test stack, we can destroy it with `kitchen destroy`:
+
+```text
+$ bundle exec kitchen destroy
+-----> Starting Kitchen (v2.2.5)
+-----> Destroying <dev-stack-serverless-rest-api>...
+$$$$$$ Running pulumi login https://api.pulumi.com
+       Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
+$$$$$$ Running pulumi destroy -y -r --show-config -s dev -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       Previewing destroy (dev):
+       Configuration:
+           aws:region: us-east-1
+           serverless-rest-api-lambda:api_response_text: default
+
+       ...
+       <Preview and Destroy output>
+       ...
+
+       Resources:
+           - 14 deleted
+
+       Duration: 14s
+
+       Permalink: https://app.pulumi.com/<username>/serverless-rest-api-lambda/dev/updates/9
+$$$$$$ Running pulumi stack rm --preserve-config -y -s dev -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       Stack 'dev' has been removed!
+       Finished destroying <dev-stack-serverless-rest-api> (0m22.78s).
+-----> Kitchen is finished. (0m23.42s)
+```
+
+`kitchen destroy` will run `pulumi destroy` on our stack and then a final `pulumi stack rm` to remove the stack entirely.
+We remove the stack at the end to ensure our test stacks are ephemeral and do not clog the Pulumi stack namespace after
+we are finished testing. You can verify this by running `pulumi stack ls` to see that the dev stack is not listed.
+
+### Summary
+
+So far we've seen how to create a stack with `kitchen create`,
+update it with `kitchen converge`, and then destroy it with `kitchen destroy`.
+
+In the next section, we will cover some more advanced stack testing features
+like using other backends, overriding stack config values, providing secrets,
+and simulating changes in a stack's configuration over time.

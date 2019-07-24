@@ -243,5 +243,58 @@ So far we've seen how to create a stack with `kitchen create`,
 update it with `kitchen converge`, and then destroy it with `kitchen destroy`.
 
 In the next section, we will cover some more advanced stack testing features
-like using other backends, overriding stack config values, providing secrets,
+like testing multiple stacks, using other backends, overriding stack config values, providing secrets,
 and simulating changes in a stack's configuration over time.
+
+
+## Advanced Test Customization
+
+Our simple test gave us confidence our stack is being provisioned as expected.
+Since our stack is only deployed to the us-east-1 region, however, it isn't resilient to regional disasters.
+We would like to increase the availability of the service in production by deploying it to multiple
+AWS regions. We want to capture this in our integration tests as well to mirror our production environment
+as much as possible.
+
+### Adding a West Test Stack
+
+To test our west stack, we will change our current test suite in `.kitchen.yml` to `dev-east`, introduce another suite
+called `dev-west`, and override the value of the `aws:region` for `dev-west` to be `us-west-2` instead of `us-east-1`:
+
+```yaml
+# .kitchen.yml
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+suites:
+  - name: dev-east
+    driver:
+      config_file: Pulumi.dev.yaml
+  - name: dev-west
+    driver:
+      config_file: Pulumi.dev.yaml
+      config:
+        aws:
+          region: us-west-2
+
+platforms:
+  - name: serverless-rest-api
+```
+
+Let's break down what we changed:
+
+1. We removed the `stack` driver attribute because Kitchen-Pulumi will use the name of
+   the suite by default. So the stacks that will be created for us will be named `dev-east` and `dev-west`.
+1. We set the `config_file` driver attribute for both suites to be `Pulumi.dev.yaml`.
+   This allows us to use the same base config file for both stacks. If we did not
+   set this, Pulumi would look for `Pulumi.dev-east.yaml` and `Pulumi.dev-west.yaml`,
+   which we don't have in our project folder.
+   The value of `config_file` can be any valid YAML file that matches the Pulumi
+   stack config file specification.
+1. We override the value of the `aws:region` on the `dev-west` stack using the `config`
+   driver attribute. The `config` attribute is a map of maps whose top-level keys
+   correspond to Pulumi namespaces. The values defined in a `config` driver attribute will
+   always take precedence over those defined in an instance's `config_file`.

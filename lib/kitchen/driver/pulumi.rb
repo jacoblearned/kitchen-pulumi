@@ -75,7 +75,7 @@ module Kitchen
       def stack
         return config_test_stack_name unless config_test_stack_name.empty?
 
-        instance.suite.name
+        "#{instance.suite.name}-#{instance.platform.name}"
       end
 
       def login

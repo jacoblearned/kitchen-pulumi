@@ -13,7 +13,7 @@ require 'kitchen/pulumi/config_attribute/directory'
 require 'kitchen/pulumi/config_attribute/plugins'
 require 'kitchen/pulumi/config_attribute/backend'
 require 'kitchen/pulumi/config_attribute/secrets'
-require 'kitchen/pulumi/config_attribute/stack'
+require 'kitchen/pulumi/config_attribute/test_stack_name'
 require 'kitchen/pulumi/config_attribute/stack_evolution'
 require 'kitchen/pulumi/config_attribute/refresh_config'
 
@@ -32,35 +32,30 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::Plugins
       include ::Kitchen::Pulumi::ConfigAttribute::Backend
       include ::Kitchen::Pulumi::ConfigAttribute::Secrets
-      include ::Kitchen::Pulumi::ConfigAttribute::Stack
+      include ::Kitchen::Pulumi::ConfigAttribute::TestStackName
       include ::Kitchen::Pulumi::ConfigAttribute::StackEvolution
       include ::Kitchen::Pulumi::ConfigAttribute::RefreshConfig
 
       def create(_state)
         dir = "-C #{config_directory}"
-        stack = config_stack.empty? ? instance.suite.name : config_stack
-        conf_file = config_file
 
         login
         initialize_stack(stack, dir)
-        configure(config_config, stack, dir, conf_file)
-        configure(config_secrets, stack, dir, conf_file, is_secret: true)
+        configure(config_config, stack, dir, config_file)
+        configure(config_secrets, stack, dir, config_file, is_secret: true)
       end
 
       def update(_state)
         dir = "-C #{config_directory}"
-        stack = config_stack.empty? ? instance.suite.name : config_stack
-        conf_file = config_file
 
         login
-        refresh_config(stack, dir, conf_file) if config_refresh_config
-        update_stack(stack, dir, conf_file)
+        refresh_config(stack, dir, config_file) if config_refresh_config
+        update_stack(stack, dir, config_file)
         evolve_stack(stack, dir) unless config_stack_evolution.empty?
       end
 
       def destroy(_state)
         dir = "-C #{config_directory}"
-        stack = config_stack.empty? ? instance.suite.name : config_stack
 
         cmds = [
           "destroy -y -r --show-config -s #{stack} #{dir}",
@@ -75,6 +70,12 @@ module Kitchen
         )
           puts "Stack '#{stack}' does not exist, continuing..."
         end
+      end
+
+      def stack
+        return config_test_stack_name unless config_test_stack_name.empty?
+
+        instance.suite.name
       end
 
       def login
@@ -146,7 +147,7 @@ module Kitchen
       def stack_inputs(&block)
         ::Kitchen::Pulumi::Command::Input.run(
           directory: config_directory,
-          stack: config_stack,
+          stack: config_test_stack_name,
           conf_file: config_file,
           logger: logger,
           &block
@@ -160,7 +161,7 @@ module Kitchen
       def stack_outputs(&block)
         ::Kitchen::Pulumi::Command::Output.run(
           directory: config_directory,
-          stack: config_stack,
+          stack: config_test_stack_name,
           logger: logger,
           &block
         )

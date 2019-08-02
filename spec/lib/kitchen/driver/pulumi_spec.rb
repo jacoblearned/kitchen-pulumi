@@ -30,7 +30,7 @@ describe ::Kitchen::Driver::Pulumi do
 
   def configure_driver(directory: '.',
                        kitchen_root: '.',
-                       stack: '',
+                       test_stack_name: '',
                        backend: '',
                        plugins: [],
                        config: {},
@@ -38,10 +38,16 @@ describe ::Kitchen::Driver::Pulumi do
                        secrets: {},
                        refresh_config: false,
                        stack_evolution: [])
+    test_stack_name = if test_stack_name.empty?
+                        "kitchen-pulumi-test-#{rand(10**10)}"
+                      else
+                        test_stack_name
+                      end
+
     driver_config = {
       kitchen_root: kitchen_root,
       directory: directory,
-      stack: stack.empty? ? "kitchen-pulumi-test-#{rand(10**10)}" : stack,
+      test_stack_name: test_stack_name,
       backend: backend,
       plugins: plugins,
       config: config,
@@ -69,7 +75,7 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(stack: stack_name)
+        driver = configure_driver(test_stack_name: stack_name)
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -77,7 +83,7 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow local backends' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(stack: stack_name, backend: 'file://~')
+        driver = configure_driver(test_stack_name: stack_name, backend: 'file://~')
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -85,7 +91,7 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow local backend with convenient name "local"' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(stack: stack_name, backend: 'local')
+        driver = configure_driver(test_stack_name: stack_name, backend: 'local')
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -94,7 +100,7 @@ describe ::Kitchen::Driver::Pulumi do
     it 'should allow custom config files' do
       in_tmp_project_dir('test-project') do
         config_file = 'custom-test-config-file.yaml'
-        driver = configure_driver(stack: stack_name, config_file: config_file)
+        driver = configure_driver(test_stack_name: stack_name, config_file: config_file)
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -104,9 +110,9 @@ describe ::Kitchen::Driver::Pulumi do
       in_tmp_project_dir('test-project') do
         invalid_config = { "test-project": ['must be a hash, not an array'] }
 
-        expect { configure_driver(stack: stack_name, config: invalid_config) }
+        expect { configure_driver(test_stack_name: stack_name, config: invalid_config) }
           .to raise_error(::Kitchen::UserError, /should be a map of maps/)
-        expect { configure_driver(stack: stack_name, secrets: invalid_config) }
+        expect { configure_driver(test_stack_name: stack_name, secrets: invalid_config) }
           .to raise_error(::Kitchen::UserError, /should be a map of maps/)
       end
     end
@@ -129,7 +135,7 @@ describe ::Kitchen::Driver::Pulumi do
         ]
 
         driver = configure_driver(
-          stack: stack_name,
+          test_stack_name: stack_name,
           config: config,
           config_file: config_file,
           secrets: secrets,
@@ -159,7 +165,7 @@ describe ::Kitchen::Driver::Pulumi do
         config = { 'test-project': { bucket_name: bucket_name } }
 
         driver = configure_driver(
-          stack: stack_name,
+          test_stack_name: stack_name,
           config: config,
           backend: 'https://api.pulumi.com',
         )

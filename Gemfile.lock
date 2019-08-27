@@ -419,7 +419,7 @@ GEM
     strings-ansi (0.1.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    test-kitchen (2.2.5)
+    test-kitchen (2.3.1)
       bcrypt_pbkdf (~> 1.0)
       ed25519 (~> 1.2)
       license-acceptance (~> 1.0, >= 1.0.11)

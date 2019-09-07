@@ -10,7 +10,7 @@ Style/TrailingCommaInArguments:
 Metrics/LineLength:
   Max: 90
 Metrics/ClassLength:
-  Max: 125
+  Max: 150
 Metrics/MethodLength:
   Max: 15
 Metrics/AbcSize:

@@ -15,7 +15,7 @@ platforms:
   - name: test-project-dev-west
     driver:
       backend: local
-      stack: <%= "dev-west-#{rand(10**10)}" %>
+      test_stack_name: <%= "dev-west-#{rand(10**10)}" %>
       config_file: custom-stack-config-file.yaml
       refresh_config: true
       config:
@@ -30,12 +30,11 @@ platforms:
 
   - name: test-project-dev-east
     driver:
-      stack: <%= "dev-west-#{rand(10**10)}" %>
+      test_stack_name: <%= "dev-east-#{rand(10**10)}" %>
+      config_file: dev-east.yaml
       config:
         test-project:
           bucket_name: kitchen-pulumi-9089332077
-        aws:
-          region: us-east-1
       secrets:
         test-project:
           ssh_key: foo

@@ -18,6 +18,7 @@ require 'kitchen/pulumi/config_attribute/secrets'
 require 'kitchen/pulumi/config_attribute/test_stack_name'
 require 'kitchen/pulumi/config_attribute/stack_evolution'
 require 'kitchen/pulumi/config_attribute/refresh_config'
+require 'kitchen/pulumi/config_attribute/secrets_provider'
 
 module Kitchen
   module Driver
@@ -37,6 +38,7 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::TestStackName
       include ::Kitchen::Pulumi::ConfigAttribute::StackEvolution
       include ::Kitchen::Pulumi::ConfigAttribute::RefreshConfig
+      include ::Kitchen::Pulumi::ConfigAttribute::SecretsProvider
 
       def create(_state)
         dir = "-C #{config_directory}"
@@ -81,6 +83,14 @@ module Kitchen
         "#{instance.suite.name}-#{instance.platform.name}"
       end
 
+      def secrets_provider(flag: false)
+        return '' if config_secrets_provider.empty?
+
+        return "--secrets-provider=\"#{config_secrets_provider}\"" if flag
+
+        config_secrets_provider
+      end
+
       def login
         backend = config_backend == 'local' ? '--local' : config_backend
         ::Kitchen::Pulumi::ShellOut.run(
@@ -91,7 +101,7 @@ module Kitchen
 
       def initialize_stack(stack, dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "stack init #{stack} #{dir}",
+          cmd: "stack init #{stack} #{dir} #{secrets_provider(flag: true)}",
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e

@@ -118,21 +118,21 @@ $ pulumi destroy -y
 For the first iteration of our integration test, we want to use Kitchen-Pulumi to
 simply create and destroy the stack infrastructure to ensure both operations are completed without error.
 
-Looking at `.kitchen.yml`, you will see that we have a single platform called `serverless-rest-api`
-and a single suite called `dev-stack`. Together this means we have a single [Kitchen instance](https://kitchen.ci/docs/getting-started/instances/)
-called `dev-stack-serverless-rest-api` that we can test against. You can verify this using `kitchen list`:
+Looking at `.kitchen.yml`, you will see that we have a single suite called `serverless-rest-api`
+and a single platform called `dev-stack`. Together this means we have a single [Kitchen instance](https://kitchen.ci/docs/getting-started/instances/)
+called `serverless-rest-api-dev-stack` that we can test against. You can verify this using `kitchen list`:
 
 ```text
 $ bundle exec kitchen list
 Instance                       Driver  Provisioner  Verifier  Transport  Last Action    Last Error
-dev-stack-serverless-rest-api  Pulumi  Pulumi       Busser    Ssh        <Not Created>  <None>
+serverless-rest-api-dev-stack  Pulumi  Pulumi       Busser    Ssh        <Not Created>  <None>
 ```
 
 ### Driver Configuration
 
 Setting attributes on the driver is how we customize our integration tests.
 Currently, we set the driver's `config_file` attribute to the value `Pulumi.dev.yaml`.
-This means that the `dev-stack` suite will run tests against a stack named `dev-stack`
+This means that the `dev-stack` platform will run tests against a stack named `dev-stack`
 using the config values set in `Pulumi.dev.yaml`.
 
 ### Creating a Stack
@@ -142,12 +142,12 @@ We can create our dev stack by running `kitchen create`:
 ```text
 $ bundle exec kitchen create
 -----> Starting Kitchen (v2.3.2)
------> Creating <dev-stack-serverless-rest-api>...
+-----> Creating <serverless-rest-api-dev-stack>...
 $$$$$$ Running pulumi login https://api.pulumi.com
        Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
 $$$$$$ Running pulumi stack init dev-stack -C /Users/<username>/OSS/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
        Created stack 'dev-stack'
-       Finished creating <dev-stack-serverless-rest-api> (0m2.67s).
+       Finished creating <serverless-rest-api-dev-stack> (0m2.67s).
 -----> Kitchen is finished. (0m3.43s)
 ```
 
@@ -164,7 +164,7 @@ We can now provision our stack resources by running `kitchen converge`:
 ```text
 $ bundle exec kitchen converge
 -----> Starting Kitchen (v2.2.5)
------> Converging <dev-stack-serverless-rest-api>...
+-----> Converging <serverless-rest-api-dev-stack>...
 $$$$$$ Running pulumi login https://api.pulumi.com
        Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
 $$$$$$ Running pulumi up -y -r --show-config -s dev-stack  -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
@@ -186,7 +186,7 @@ $$$$$$ Running pulumi up -y -r --show-config -s dev-stack  -C /Path/to/kitchen-p
        Duration: 19s
 
        Permalink: https://app.pulumi.com/<username>/serverless-rest-api-lambda/dev-stack/updates/1
-       Finished converging <dev-stack-serverless-rest-api> (0m27.39s).
+       Finished converging <serverless-rest-api-dev-stack> (0m27.39s).
 -----> Kitchen is finished. (0m20.31s)
 ```
 
@@ -205,7 +205,7 @@ Now that we have manually validated our test stack, we can destroy it with `kitc
 ```text
 $ bundle exec kitchen destroy
 -----> Starting Kitchen (v2.2.5)
------> Destroying <dev-stack-serverless-rest-api>...
+-----> Destroying <serverless-rest-api-dev-stack>...
 $$$$$$ Running pulumi login https://api.pulumi.com
        Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
 $$$$$$ Running pulumi destroy -y -r --show-config -s dev-stack -C /Path/to/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
@@ -228,7 +228,7 @@ $$$$$$ Running pulumi destroy -y -r --show-config -s dev-stack -C /Path/to/kitch
        If you want to remove the stack completely, run 'pulumi stack rm dev-stack'.
 $$$$$$ Running pulumi stack rm --preserve-config -y -s dev-stack -C /Users/<username>/OSS/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
        Stack 'dev-stack' has been removed!
-       Finished destroying <dev-stack-serverless-rest-api> (0m20.04s).
+       Finished destroying <serverless-rest-api-dev-stack> (0m20.04s).
 -----> Kitchen is finished. (0m23.42s)
 ```
 
@@ -238,7 +238,7 @@ we are finished testing. You can verify this by running `pulumi stack ls` to see
 
 ### Summary
 
-So far we've seen how to
+So far, we've seen how to
 1. Create a stack with `kitchen create`
 1. Update a stack with `kitchen converge`
 1. Destroy it with `kitchen destroy`
@@ -246,7 +246,6 @@ So far we've seen how to
 In the next section, we will cover some more advanced stack testing features
 like testing multiple stacks, using other backends, overriding stack config values, providing secrets,
 and simulating changes in a stack's configuration over time.
-
 
 ## Advanced Test Customization
 
@@ -258,8 +257,8 @@ as much as possible.
 
 ### Adding a West Test Stack
 
-To test our new us-west-2 based stack, we will change our current test suite in `.kitchen.yml` to `dev-east`, introduce another suite
-called `dev-west`, and override the value of the `aws:region` for `dev-west` to be `us-west-2` instead of `us-east-1`:
+To test our new us-west-2 based stack, we will change our current test platform in `.kitchen.yml` to `dev-east-test`, introduce another platform
+called `dev-west-test`, and override the value of the `aws:region` for `dev-west-test` to be `us-west-2` instead of `us-east-1`:
 
 ```yaml
 # .kitchen.yml
@@ -271,6 +270,9 @@ provisioner:
   name: pulumi
 
 suites:
+  - name: serverless-rest-api
+
+platforms:
   - name: dev-east-test
     driver:
       config_file: Pulumi.dev.yaml
@@ -280,17 +282,14 @@ suites:
       config:
         aws:
           region: us-west-2
-
-platforms:
-  - name: serverless-rest-api
 ```
 
 Let's break down what we changed:
 
 1. We removed the `test_stack_name` driver attribute because Kitchen-Pulumi will use the name of
-   the instance by default. So the stacks that will be created for us will be named `dev-east-test-serverless-rest-api` and `dev-west-test-serverless-rest-api`.
+   the instance by default. So the stacks that will be created for us will be named `serverless-rest-api-dev-east-test` and `serverless-rest-api-dev-west-test`.
 1. We set the `config_file` driver attribute for both suites to be `Pulumi.dev.yaml`.
-   This allows us to use the same base config file for both stacks.
+   This allows us to use the same base stack config file for both stacks.
    The value of `config_file` can be any valid YAML file that matches the Pulumi
    stack config file specification.
 1. We override the value of the `aws:region` stack config on the `dev-west` stack using the `config`

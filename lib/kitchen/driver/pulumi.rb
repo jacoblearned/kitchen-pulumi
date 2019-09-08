@@ -19,6 +19,7 @@ require 'kitchen/pulumi/config_attribute/test_stack_name'
 require 'kitchen/pulumi/config_attribute/stack_evolution'
 require 'kitchen/pulumi/config_attribute/refresh_config'
 require 'kitchen/pulumi/config_attribute/secrets_provider'
+require 'kitchen/pulumi/config_attribute/preserve_config'
 
 module Kitchen
   module Driver
@@ -39,6 +40,7 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::StackEvolution
       include ::Kitchen::Pulumi::ConfigAttribute::RefreshConfig
       include ::Kitchen::Pulumi::ConfigAttribute::SecretsProvider
+      include ::Kitchen::Pulumi::ConfigAttribute::PreserveConfig
 
       def create(_state)
         dir = "-C #{config_directory}"
@@ -64,7 +66,7 @@ module Kitchen
 
         cmds = [
           "destroy -y -r --show-config -s #{stack} #{dir}",
-          "stack rm --preserve-config -y -s #{stack} #{dir}",
+          "stack rm #{preserve_config} -y -s #{stack} #{dir}",
         ]
 
         login
@@ -75,6 +77,12 @@ module Kitchen
         )
           puts "Stack '#{stack}' does not exist, continuing..."
         end
+      end
+
+      def preserve_config
+        return '' unless config_preserve_config
+
+        '--preserve-config'
       end
 
       def stack

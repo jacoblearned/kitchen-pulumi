@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require 'yaml'
 require 'kitchen'
 require 'kitchen/driver/base'
 require 'kitchen/pulumi/error'
 require 'kitchen/pulumi/shell_out'
+require 'kitchen/pulumi/deep_merge.rb'
 require 'kitchen/pulumi/configurable'
 require 'kitchen/pulumi/command/input'
 require 'kitchen/pulumi/command/output'
@@ -38,20 +40,21 @@ module Kitchen
 
       def create(_state)
         dir = "-C #{config_directory}"
-
         login
         initialize_stack(stack, dir)
-        configure(config_config, stack, dir, config_file)
-        configure(config_secrets, stack, dir, config_file, is_secret: true)
       end
 
       def update(_state)
         dir = "-C #{config_directory}"
 
-        login
-        refresh_config(stack, dir, config_file) if config_refresh_config
-        update_stack(stack, dir, config_file)
-        evolve_stack(stack, dir) unless config_stack_evolution.empty?
+        ::Kitchen::Pulumi.with_temp_conf(config_file) do |temp_conf_file|
+          login
+          refresh_config(stack, temp_conf_file, dir) if config_refresh_config
+          configure(config_config, stack, temp_conf_file, dir)
+          configure(config_secrets, stack, temp_conf_file, dir, is_secret: true)
+          update_stack(stack, temp_conf_file, dir)
+          evolve_stack(stack, temp_conf_file, dir) unless config_stack_evolution.empty?
+        end
       end
 
       def destroy(_state)
@@ -97,7 +100,8 @@ module Kitchen
 
       def configure(stack_confs, stack, conf_file, dir = '', is_secret: false)
         secret = is_secret ? '--secret' : ''
-        base_cmd = "config set #{secret} -s #{stack} #{dir} #{conf_file}"
+        config_flag = config_file(conf_file, flag: true)
+        base_cmd = "config set #{secret} -s #{stack} #{dir} #{config_flag}"
 
         stack_confs.each do |namespace, stack_settings|
           stack_settings.each do |key, val|
@@ -111,32 +115,37 @@ module Kitchen
 
       def refresh_config(stack, conf_file, dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "config refresh -s #{stack} #{dir} #{conf_file}",
+          cmd: "config refresh -s #{stack} #{dir} #{config_file(conf_file, flag: true)}",
           logger: logger,
         )
       rescue ::Kitchen::Pulumi::Error => e
         puts 'Continuing...' if e.message.match?(/no previous deployment/)
       end
 
-      def config_file(conf_file = '')
+      def config_file(conf_file = '', flag: false)
         file = conf_file.empty? ? config_config_file : conf_file
         return '' if File.directory?(file) || file.empty?
 
-        "--config-file #{file}"
+        return "--config-file #{file}" if flag
+
+        file
       end
 
       def update_stack(stack, conf_file, dir = '')
+        base_cmd = "up -y -r --show-config -s #{stack} #{dir}"
         ::Kitchen::Pulumi::ShellOut.run(
-          cmd: "up -y -r --show-config -s #{stack} #{dir} #{conf_file}",
+          cmd: "#{base_cmd} #{config_file(conf_file, flag: true)}",
           logger: logger,
         )
       end
 
-      def evolve_stack(stack, dir = '')
+      def evolve_stack(stack, conf_file, dir = '')
         config_stack_evolution.each do |evolution|
-          conf_file = config_file(evolution.fetch(:config_file, ''))
+          new_conf_file = config_file(evolution.fetch(:config_file, ''))
           new_stack_confs = evolution.fetch(:config, {})
           new_stack_secrets = evolution.fetch(:secrets, {})
+
+          rewrite_config_file(new_conf_file, conf_file)
 
           configure(new_stack_confs, stack, conf_file, dir)
           configure(new_stack_secrets, stack, conf_file, dir, is_secret: true)
@@ -144,11 +153,22 @@ module Kitchen
         end
       end
 
+      def rewrite_config_file(new_conf_file, old_conf_file)
+        return if new_conf_file.empty?
+
+        old_conf = YAML.load_file(old_conf_file)
+        new_conf_file = File.join(config_directory, new_conf_file)
+        return unless File.exist?(new_conf_file)
+
+        new_conf = old_conf.deep_merge(YAML.load_file(new_conf_file))
+        File.write(old_conf_file, new_conf.to_yaml)
+      end
+
       def stack_inputs(&block)
         ::Kitchen::Pulumi::Command::Input.run(
           directory: config_directory,
-          stack: config_test_stack_name,
-          conf_file: config_file,
+          stack: stack,
+          conf_file: config_file(flag: true),
           logger: logger,
           &block
         )
@@ -161,7 +181,7 @@ module Kitchen
       def stack_outputs(&block)
         ::Kitchen::Pulumi::Command::Output.run(
           directory: config_directory,
-          stack: config_test_stack_name,
+          stack: stack,
           logger: logger,
           &block
         )

@@ -37,6 +37,7 @@ describe ::Kitchen::Driver::Pulumi do
                        config_file: '',
                        secrets: {},
                        refresh_config: false,
+                       secrets_provider: '',
                        stack_evolution: [])
     test_stack_name = if test_stack_name.empty?
                         "kitchen-pulumi-test-#{rand(10**10)}"
@@ -54,6 +55,7 @@ describe ::Kitchen::Driver::Pulumi do
       config_file: config_file,
       secrets: secrets,
       refresh_config: refresh_config,
+      secrets_provider: secrets_provider,
       stack_evolution: stack_evolution,
     }
 
@@ -78,6 +80,17 @@ describe ::Kitchen::Driver::Pulumi do
         driver = configure_driver(test_stack_name: stack_name)
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
+      end
+    end
+
+    it 'should raise an error when an invalid secrets provider is given' do
+      in_tmp_project_dir('test-project') do
+        driver = configure_driver(
+          test_stack_name: stack_name,
+          secrets_provider: 'awskms://1234abcd-12ab-34cd-56-1234567890?region=us-east-1',
+        )
+        expect { driver.create({}) }
+          .to output(/does not exist/).to_stdout_from_any_process
       end
     end
 

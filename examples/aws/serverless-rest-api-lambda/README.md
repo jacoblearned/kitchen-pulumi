@@ -346,3 +346,37 @@ $$$$$$ Running pulumi stack init serverless-rest-api-dev-west-test -C /Users/<us
 
 If you visit both of the output URLs, you will see our service is now live in both regions.
 Whenever you are ready, destroy both stacks with `bundle exec kitchen destroy`.
+
+### Specifying a Backend
+
+If you're organization has its own internal backend or you would like to use your local machine as a backend, you can tell Kitchen-Pulumi to do so using the `backend` driver attribute. The value of `backend` defaults to the Pulumi SaaS backend, and accepts any valid URL or the keyword `local` for using the local backend.
+
+Note: When using the local backend, you may see stack config files being created. These are created by Pulumi to properly encrypt values and will be removed during `kitchen destroy`.
+
+The following will use a local backend for the west stack and an S3 bucket for the east:
+
+```yaml
+---
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+suites:
+  - name: serverless-rest-api
+
+platforms:
+  - name: dev-east-test
+    driver:
+      backend: s3://my-pulumi-state-bucket
+      config_file: Pulumi.dev.yaml
+  - name: dev-west-test
+    driver:
+      backend: local
+      config_file: Pulumi.dev.yaml
+      config:
+        aws:
+          region: us-west-2
+```

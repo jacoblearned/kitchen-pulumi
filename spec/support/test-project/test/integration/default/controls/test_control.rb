@@ -3,17 +3,17 @@
 control 'test_control' do
   describe 'bucket name input and outputs match without prefix' do
     subject do
-      attribute('bucketName')
+      input('bucketName')
     end
 
-    it { should eq attribute('test-project:bucket_name') }
+    it { should eq input('test-project:bucket_name') }
   end
 
   describe 'bucket_name input and outputs match' do
     subject do
-      attribute('output_bucketName')
+      input('output_bucketName')
     end
 
-    it { should eq attribute('input_test-project:bucket_name') }
+    it { should eq input('input_test-project:bucket_name') }
   end
 end

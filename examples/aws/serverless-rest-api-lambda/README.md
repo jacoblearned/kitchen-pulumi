@@ -296,3 +296,53 @@ Let's break down what we changed:
    driver attribute. The `config` attribute is a map of maps whose top-level keys
    correspond to Pulumi namespaces. The values defined in a `config` driver attribute will
    always take precedence over those defined in an instance's `config_file`.
+
+### Provisioning Multiple Stacks
+
+With this configuration, we can now create two identical test stacks deployed to both us-east-1 and us-west-2:
+
+```
+$ bundle exec kitchen converge
+-----> Creating <serverless-rest-api-dev-east-test>...
+$$$$$$ Running pulumi login https://api.pulumi.com
+       Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
+$$$$$$ Running pulumi stack init serverless-rest-api-dev-east-test -C /Users/<username>/OSS/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       Created stack 'serverless-rest-api-dev-east-test'
+       Finished creating <serverless-rest-api-dev-east-test> (0m2.21s).
+-----> Converging <serverless-rest-api-dev-east-test>...
+
+       <Update output for east stack>
+
+       Outputs:
+           url: "https://y0nh87lz59.execute-api.us-east-1.amazonaws.com/stage/"
+
+       Resources:
+           + 14 created
+
+       Duration: 19s
+
+       Permalink: https://app.pulumi.com/<username>/serverless-rest-api-lambda/serverless-rest-api-dev-east-test/updates/1
+       Finished converging <serverless-rest-api-dev-east-test> (0m25.91s).
+-----> Creating <serverless-rest-api-dev-west-test>...
+$$$$$$ Running pulumi login https://api.pulumi.com
+       Logged into pulumi.com as <username> (https://app.pulumi.com/<username>)
+$$$$$$ Running pulumi stack init serverless-rest-api-dev-west-test -C /Users/<username>/OSS/kitchen-pulumi/examples/aws/serverless-rest-api-lambda
+       Created stack 'serverless-rest-api-dev-west-test'
+       Finished creating <serverless-rest-api-dev-west-test> (0m1.84s).
+-----> Converging <serverless-rest-api-dev-west-test>...
+       <Update output for west stack>
+
+       Outputs:
+           url: "https://t87sy6zivb.execute-api.us-west-2.amazonaws.com/stage/"
+
+       Resources:
+           + 14 created
+
+       Duration: 29s
+
+       Permalink: https://app.pulumi.com/<username>/serverless-rest-api-lambda/serverless-rest-api-dev-west-test/updates/1
+       Finished converging <serverless-rest-api-dev-west-test> (0m37.75s).
+```
+
+If you visit both of the output URLs, you will see our service is now live in both regions.
+Whenever you are ready, destroy both stacks with `bundle exec kitchen destroy`.

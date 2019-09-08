@@ -1,5 +1,5 @@
 name: default
-attributes:
+inputs:
   - name: input_test-project:bucket_name
     type: string
     required: true

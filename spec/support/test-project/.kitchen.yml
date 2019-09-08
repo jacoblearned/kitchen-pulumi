@@ -18,6 +18,7 @@ platforms:
       test_stack_name: <%= "dev-west-#{rand(10**10)}" %>
       config_file: custom-stack-config-file.yaml
       refresh_config: true
+      preserve_config: true
       config:
         test-project:
           foo: bar
@@ -32,6 +33,7 @@ platforms:
     driver:
       test_stack_name: <%= "dev-east-#{rand(10**10)}" %>
       config_file: dev-east.yaml
+      preserve_config: true
       config:
         test-project:
           bucket_name: kitchen-pulumi-9089332077

@@ -36,6 +36,7 @@ describe ::Kitchen::Driver::Pulumi do
                        config: {},
                        config_file: '',
                        secrets: {},
+                       preserve_config: false,
                        refresh_config: false,
                        secrets_provider: '',
                        stack_evolution: [])
@@ -54,6 +55,7 @@ describe ::Kitchen::Driver::Pulumi do
       config: config,
       config_file: config_file,
       secrets: secrets,
+      preserve_config: preserve_config,
       refresh_config: refresh_config,
       secrets_provider: secrets_provider,
       stack_evolution: stack_evolution,
@@ -181,6 +183,7 @@ describe ::Kitchen::Driver::Pulumi do
           test_stack_name: stack_name,
           config: config,
           backend: 'https://api.pulumi.com',
+          preserve_config: true,
         )
 
         expect { driver.destroy({}) }

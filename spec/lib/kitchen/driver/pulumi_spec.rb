@@ -90,7 +90,7 @@ describe ::Kitchen::Driver::Pulumi do
           secrets_provider: 'awskms://1234abcd-12ab-34cd-56-1234567890?region=us-east-1',
         )
         expect { driver.create({}) }
-          .to output(/does not exist/).to_stdout_from_any_process
+          .to output(/error/).to_stdout_from_any_process
       end
     end
 

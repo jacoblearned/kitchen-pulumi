@@ -1,6 +1,9 @@
 ---
 AllCops:
   TargetRubyVersion: 2.6
+  Exclude:
+    - 'vendor/**/*'
+    - 'lib/kitchen/pulumi/deep_merge.rb'
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArrayLiteral:
@@ -10,7 +13,7 @@ Style/TrailingCommaInArguments:
 Metrics/LineLength:
   Max: 90
 Metrics/ClassLength:
-  Max: 125
+  Max: 150
 Metrics/MethodLength:
   Max: 15
 Metrics/AbcSize:

@@ -407,7 +407,6 @@ suites:
       config_file: Pulumi.dev.yaml
       secrets_provider: "awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1"
 
-
 platforms:
   - name: serverless-rest-api
 ```
@@ -442,8 +441,59 @@ suites:
         my-project:
           ssh_key: <%= ENV['TEST_USER_SSH_KEY'] %>
 
-
 platforms:
   - name: serverless-rest-api
 ```
 
+### Testing Stack Changes Over Time
+
+To further test the resolve of your Pulumi project, you may want to test how
+existing stacks will react to changes in configuration values after their initial
+provisioning. Kitchen-Pulumi allows you to test successive changes to existing
+test stacks through the `stack_evolution` driver attribute.
+
+`stack_evolution` takes a list of desired configuration changes as specified using the following three values (at least one must be provided):
+
+  * `config_file` - A valid YAML file to use instead of the config file defined on the top-level `config_file` driver attribute.
+  * `config` - A map of values with same structure as the top-level `config` driver attribute. These values are merged with the top-level `config` and any keys specified in both will be overwritten by the `stack_evolution` step's value.
+  * `secrets` - A map of secrets with same structure as the top-level `secrets` driver attribute. These values are merged with the top-level `secrets` and any keys specified in both will be overwritten by the `stack_evolution` step's value.
+
+Each item in `stack_evolution` represents an independent stack configuration.
+Kitchen-Pulumi will call `pulumi up` on the test stack for each configuration.
+The example below will perform the following stack updates on dev-stack when `kitchen converge` runs against it:
+
+1. The initial update using the configuration specified in the top-level `config_file`, `Pulumi.dev.yaml`.
+2. If the first update succeeded, the stack will be updated using the configuration specified in `test-cases/second_update_changed_response.yaml`.
+3. If the second update succeeded, the stack will be updated using the configuration specified in the top-level config file, `Pulumi.dev.yaml`, but with the
+`serverless-rest-api-lambda:api_response_text` and `serverless-rest-api-lambda:db_password` values overridden.
+
+```yaml
+# .kitchen.yml
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+suites:
+  - name: dev-stack
+    driver:
+      test_stack_name: dev-stack
+      config_file: Pulumi.dev.yaml
+      stack_evolution:
+        - config_file: test-cases/second_update_changed_response.yaml
+        - config:
+            serverless-rest-api-lambda:
+              api_response_text: third update
+          secrets:
+            serverless-rest-api-lambda:
+              db_password: <%= ENV['NEW_DB_PASSWORD'] %>
+
+platforms:
+  - name: serverless-rest-api
+
+```
+
+You can think of the top-level `config_file`, `config`, and `secrets` values as "global" settings for the driver across stack updates, and those specified in
+`stack_evolution` as temporary overrides.

@@ -356,7 +356,7 @@ Note: When using the local backend, you may see stack config files being created
 The following will use a local backend for the west stack and an S3 bucket for the east:
 
 ```yaml
----
+# .kitchen.yml
 
 driver:
   name: pulumi
@@ -380,3 +380,70 @@ platforms:
         aws:
           region: us-west-2
 ```
+
+### Providing Secrets
+
+#### Specifying a Secrets Provider
+
+If you would like to use an alternative [secret encryption provider](https://www.pulumi.com/docs/intro/concepts/config/#initializing-a-stack-with-alternative-encryption)
+with your test stacks, you can provide a value to the `secrets_provider` driver attribute.
+
+When the dev-stack stack gets created, it will use the specified KMS key to encrypt secrets.
+
+```yaml
+# .kitchen.yml
+---
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+suites:
+  - name: dev-stack
+    driver:
+      test_stack_name: dev-stack
+      config_file: Pulumi.dev.yaml
+      secrets_provider: "awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1"
+
+
+platforms:
+  - name: serverless-rest-api
+```
+
+#### Overriding Config File Secrets
+
+If you have already set secret values in a stack config file, but would like to test
+the stack with a different value for certain secrets without permanently overriding
+the stack config file, you can specify a `secrets` map. This driver attribute is similar to the `config` map we used earlier to override the value of `aws:region` in our west test stack.
+
+This can be useful when secrets change between deployment environments or you have
+credentials for testing purposes only. The following configuration will set the
+`my-project:ssh_key` stack secret to the value of the `TEST_USER_SSH_KEY`
+environment variable using Ruby's flexible [ERB templating syntax](https://www.stuartellis.name/articles/erb/) without affecting the existing value of `my-project:ssh_key` defined in `Pulumi.dev.yaml`.
+
+```yaml
+# .kitchen.yml
+---
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+suites:
+  - name: dev-stack
+    driver:
+      test_stack_name: dev-stack
+      config_file: Pulumi.dev.yaml
+      secrets:
+        my-project:
+          ssh_key: <%= ENV['TEST_USER_SSH_KEY'] %>
+
+
+platforms:
+  - name: serverless-rest-api
+```
+

@@ -48,7 +48,7 @@ module Kitchen
         initialize_stack(stack, dir)
       end
 
-      def update(_state)
+      def update(_state, config_only: false)
         dir = "-C #{config_directory}"
 
         ::Kitchen::Pulumi.with_temp_conf(config_file) do |temp_conf_file|
@@ -56,8 +56,13 @@ module Kitchen
           refresh_config(stack, temp_conf_file, dir) if config_refresh_config
           configure(config_config, stack, temp_conf_file, dir)
           configure(config_secrets, stack, temp_conf_file, dir, is_secret: true)
-          update_stack(stack, temp_conf_file, dir)
-          evolve_stack(stack, temp_conf_file, dir) unless config_stack_evolution.empty?
+          update_stack(stack, temp_conf_file, dir) unless config_only
+
+          unless config_stack_evolution.empty?
+            evolve_stack(stack, temp_conf_file, dir, config_only: config_only)
+          end
+
+          yield temp_conf_file if block_given?
         end
       end
 
@@ -157,7 +162,7 @@ module Kitchen
         )
       end
 
-      def evolve_stack(stack, conf_file, dir = '')
+      def evolve_stack(stack, conf_file, dir = '', config_only: false)
         config_stack_evolution.each do |evolution|
           new_conf_file = config_file(evolution.fetch(:config_file, ''))
           new_stack_confs = evolution.fetch(:config, {})
@@ -167,7 +172,7 @@ module Kitchen
 
           configure(new_stack_confs, stack, conf_file, dir)
           configure(new_stack_secrets, stack, conf_file, dir, is_secret: true)
-          update_stack(stack, conf_file, dir)
+          update_stack(stack, conf_file, dir) unless config_only
         end
       end
 
@@ -183,13 +188,15 @@ module Kitchen
       end
 
       def stack_inputs(&block)
-        ::Kitchen::Pulumi::Command::Input.run(
-          directory: config_directory,
-          stack: stack,
-          conf_file: config_file(flag: true),
-          logger: logger,
-          &block
-        )
+        update({}, config_only: true) do |temp_conf_file|
+          ::Kitchen::Pulumi::Command::Input.run(
+            directory: config_directory,
+            stack: stack,
+            conf_file: config_file(temp_conf_file, flag: true),
+            logger: logger,
+            &block
+          )
+        end
 
         self
       rescue ::Kitchen::Pulumi::Error => e

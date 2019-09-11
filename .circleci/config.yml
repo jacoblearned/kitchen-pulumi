@@ -111,5 +111,7 @@ workflows:
             - build_25
             - build_26
           filters:
+            tags:
+              only: /.*/
             branches:
-              only: master
+              ignore: /.*/

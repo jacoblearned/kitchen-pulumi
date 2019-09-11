@@ -3,7 +3,6 @@
     "main": "index.js",
     "dependencies": {
         "@pulumi/pulumi": "latest",
-        "@pulumi/aws": "latest",
         "@pulumi/awsx": "latest"
     }
 }

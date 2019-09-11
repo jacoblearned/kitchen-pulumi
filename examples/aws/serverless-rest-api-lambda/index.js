@@ -1,10 +1,9 @@
 // Import the [pulumi/aws](https://pulumi.io/reference/pkg/nodejs/@pulumi/aws/index.html) package
 const pulumi = require("@pulumi/pulumi");
-const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
 const config = new pulumi.Config();
-const sourceResponse = config.require("api_response_text");
+const responseText = config.require("api_response_text");
 
 // Create a public HTTP endpoint (using AWS APIGateway)
 const endpoint = new awsx.apigateway.API("hello", {
@@ -15,7 +14,7 @@ const endpoint = new awsx.apigateway.API("hello", {
       localPath: "www"
     },
 
-    // Serve a simple REST API on `GET /name` (using AWS Lambda)
+    // Serve a simple REST API on `GET /response` (using AWS Lambda)
     {
       path: "/response",
       method: "GET",
@@ -23,7 +22,7 @@ const endpoint = new awsx.apigateway.API("hello", {
         cb(undefined, {
           statusCode: 200,
           body: Buffer.from(
-            JSON.stringify({ response: sourceResponse }),
+            JSON.stringify({ response: responseText }),
             "utf8"
           ).toString("base64"),
           isBase64Encoded: true,

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tempfile'
+
 # Global kitchen module
 module Kitchen
   # Namespace for Kitchen-Pulumi logic

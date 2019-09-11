@@ -9,11 +9,8 @@ provisioner:
 suites:
   - name: dev-stack
     driver:
-      stack: dev
-      stack_evolution:
-        # This stack evolution will update the stack after its initial
-        # update and change the API response text to 'hello, kitchen pulumi'
-        - config_file: new_response_config.yaml
+      test_stack_name: dev-stack
+      config_file: Pulumi.dev.yaml
 
 
 platforms:

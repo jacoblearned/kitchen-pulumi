@@ -401,14 +401,14 @@ provisioner:
   name: pulumi
 
 suites:
+  - name: serverless-rest-api
+
+platforms:
   - name: dev-stack
     driver:
       test_stack_name: dev-stack
       config_file: Pulumi.dev.yaml
       secrets_provider: "awskms://1234abcd-12ab-34cd-56ef-1234567890ab?region=us-east-1"
-
-platforms:
-  - name: serverless-rest-api
 ```
 
 #### Overriding Config File Secrets
@@ -433,6 +433,9 @@ provisioner:
   name: pulumi
 
 suites:
+  - name: serverless-rest-api
+
+platforms:
   - name: dev-stack
     driver:
       test_stack_name: dev-stack
@@ -440,9 +443,6 @@ suites:
       secrets:
         my-project:
           ssh_key: <%= ENV['TEST_USER_SSH_KEY'] %>
-
-platforms:
-  - name: serverless-rest-api
 ```
 
 ### Testing Stack Changes Over Time
@@ -477,6 +477,9 @@ provisioner:
   name: pulumi
 
 suites:
+  - name: serverless-rest-api
+
+platforms:
   - name: dev-stack
     driver:
       test_stack_name: dev-stack
@@ -489,11 +492,182 @@ suites:
           secrets:
             serverless-rest-api-lambda:
               db_password: <%= ENV['NEW_DB_PASSWORD'] %>
-
-platforms:
-  - name: serverless-rest-api
-
 ```
 
 You can think of the top-level `config_file`, `config`, and `secrets` values as "global" settings for the driver across stack updates, and those specified in
 `stack_evolution` as temporary overrides.
+
+## Verifying Stack State Using InSpec Tests
+
+Although a successful stack update gives us some amount of confidence our stack is working, there is still a lot that can go wrong
+when deploying infrastructure and services. For example, the API code we ship with
+the Lambda function may have a bug not caught by unit tests and causes HTTP 500 errors to be returned by the service.
+
+To provide more control over validation logic, Kitchen-Pulumi provides a Verifier that allows you to run custom validation code as described by [InSpec Profiles](https://www.inspec.io/docs/reference/profiles/) (in a derivative way to that of [Kitchen-Terraform](https://www.rubydoc.info/github/newcontext-oss/kitchen-terraform/Kitchen/Verifier/Terraform)). This provides a lot of flexibility to the test code you can write against your test stacks.
+
+For example, let's revisit our multi-region API setup from earlier with a new requirement:
+When a user accesses the us-west-2 endpoint, we want to display a different response
+text value than that of the us-east-1 API. (Say, for example we are routing all users from western U.S. states to our us-west-2 API using geolocation-based DNS records.)
+
+We'd like to test that both stacks are created properly in each region and that the
+API response text returned by the `/response` endpoint is different for each region.
+
+### Add the Kitchen-Pulumi Verifier to .kitchen.yml
+
+Let's setup the integration test described and add the Kitchen Pulumi verifier in our .kithen.yml:
+
+```yaml
+# .kitchen.yml
+
+driver:
+  name: pulumi
+
+provisioner:
+  name: pulumi
+
+verifier:
+  name: pulumi
+  systems:
+    - name: API response test
+      backend: local
+
+suites:
+  - name: serverless-rest-api
+
+platforms:
+  - name: dev-east
+    driver:
+      config_file: Pulumi.dev.yaml
+  - name: dev-west
+    driver:
+      config_file: Pulumi.dev.yaml
+      config:
+        serverless-rest-api-lambda:
+          api_response_text: Hello from us-west-2
+```
+
+We added the verifier named `pulumi` with one test system named API response test that
+will use our local machine as the InSpec backend. You can name your systems whatever you'd like as Kithchen-Pulumi will look for InSpec Profiles in the `test/integration/<kitchen suite name>` directory.
+
+If you run `bundle exec kitchen list`, you should see our two instances now have `Pulumi` as the value of the Verifier:
+
+```
+$ bundle exec kitchen list
+Instance                      Driver  Provisioner  Verifier  Transport  Last Action    Last Error
+serverless-rest-api-dev-east  Pulumi  Pulumi       Pulumi    Ssh        <Not Created>       <None>
+serverless-rest-api-dev-west  Pulumi  Pulumi       Pulumi    Ssh        <Not Created>  <None>
+```
+
+### Add an InSpec Profile
+
+Now let's create the InSpec profile that will contain the test logic by first setting up the profile's structure:
+
+```
+$ mkdir -p test/integration/serverless-rest-api/controls
+$ touch test/integration/serverless-rest-api/inspec.yml
+$ touch test/integration/serverless-rest-api/controls/verify_response.rb
+```
+
+We created a profile directory for our `serverless-rest-api` suite. Kitchen-Pulumi uses test suite names to look for the location of InSpec profiles. By breaking our
+east and west tests into separate platforms on a single suite, we can test both stacks
+using the same InSpec profile.
+
+Go ahead and place the following into the `inspec.yml` file we created:
+
+```yaml
+# test/integration/serverless-rest-api/inspec.yml
+
+name: serverless-rest-api
+inputs:
+  - name: serverless-rest-api-lambda:api_response_text
+    type: string
+    required: true
+  - name: url
+    type: string
+    required: true
+```
+
+This file describes our `serverless-rest-api` profile and defines two [InSpec Input](https://www.inspec.io/docs/reference/inputs/) values to use in our test:
+
+* The stack configuration value for `serverless-rest-api-lambda:api_response_text` at the time the kitchen instance was verified.
+* The stack output value named `url` exported from our Pulumi project code in `index.js`.
+
+If you prefer to make the source of these InSpec inputs more explicit, you can prefix them with `input_` and `output_` respectively (but either form is acceptable):
+
+```yaml
+# test/integration/serverless-rest-api/inspec.yml
+
+name: serverless-rest-api
+inputs:
+  - name: input_serverless-rest-api-lambda:api_response_text
+    type: string
+    required: true
+  - name: output_url
+    type: string
+    required: true
+```
+
+With these two inputs available to us, we can write an InSpec Control in `controls/verify_response.rb` to ensure the API is returning the expected response:
+
+```ruby
+# frozen_string_literal: true
+
+# test/integration/serverless-rest-api/controls/verify_response.rb
+
+require 'net/http'
+require 'json'
+
+api_url = input('output_url')
+
+control 'Verify API Response' do
+  describe 'API response text' do
+    subject do
+      input('serverless-rest-api-lambda:api_response_text')
+    end
+
+    endpoint = "#{api_url}/response"
+    response = Net::HTTP.get(URI(endpoint))
+    response_text = JSON.parse(response).fetch('response')
+
+    it { should eq response_text }
+  end
+end
+```
+
+With our control code ready, we can now test both stacks are created properly and
+they API is healthy and returning the expected values for both regions. If you run `bundle exec kitchen verify`, you should see both test stacks created, updated, and
+verified with our control code with terminal output similar to the following for the
+west region API:
+
+```
+$ bundle exec kitchen verify
+
+<... A lot of Test Kitchen output ...>
+
+API response test: Verifying
+
+Profile: serverless-rest-api
+Version: (not specified)
+Target:  local://
+
+  ✔  Verify API Response: API response text
+     ✔  API response text should eq "Hello from us-west-2"
+
+
+Profile Summary: 1 successful control, 0 control failures, 0 controls skipped
+Test Summary: 1 successful, 0 failures, 0 skipped
+       Finished verifying <serverless-rest-api-dev-west> (0m5.23s).
+```
+
+We have successfully verified that both our API deployments are healthy and performing
+as expected. Go ahead and destroy the stacks whenever you are ready:
+
+```
+$ bundle exec kitchen destroy
+```
+
+## Wrapping Up
+
+This tutorial gave an overview of the Kitchen-Pulumi's features. If you have any
+questions or spot an issue with the tutorial code or writing, please feel free to
+submit an [issue](https://github.com/jacoblearned/kitchen-pulumi/issues) or a [pull request](https://github.com/jacoblearned/kitchen-pulumi/pulls) so it can be remediated.

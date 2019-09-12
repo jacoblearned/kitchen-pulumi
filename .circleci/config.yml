@@ -74,9 +74,49 @@ jobs:
     docker:
       - image: circleci/ruby:2.6.2-node
 
+  release_gem:
+    docker:
+      - image: circleci/ruby:2.6.2-node
+    steps:
+      - checkout
+
+      # Install dependencies
+      - restore_cache:
+          keys:
+            - kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
+            - kitchen-pulumi-dependencies
+      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - save_cache:
+          paths:
+            - vendor/bundle
+          key: kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
+
+      - run:
+          name: Build Gem
+          command: bundle exec gem build kitchen-pulumi.gemspec
+
+      - run:
+          name: Deploy Gem
+          command: |
+            mkdir ~/.gem
+            cat .circleci/gem_credentials | sed -e "s/__RUBYGEMS_API_KEY__/${GEM_API_KEY}/" > ~/.gem/credentials
+            chmod 0600 ~/.gem/credentials
+            bundle exec gem push kitchen-pulumi-*.gemspec
+            shred -u ~/.gem/credentials
+
 workflows:
   build:
     jobs:
       - build_24
       - build_25
       - build_26
+      - release_gem:
+          requires:
+            - build_24
+            - build_25
+            - build_26
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/

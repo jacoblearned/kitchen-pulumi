@@ -25,10 +25,50 @@ and [verifier](https://kitchen.ci/docs/verifiers/) which collectively support th
 
 If there's a feature you would like to see in Kitchen-Pulumi, please create an issue with the suggested feature and its intended use case.
 
-## Quick Start
+## Installation
+
+Kitchen-Pulumi is compatible with Ruby 2.4 and above. Add this line to your application's Gemfile:
+
+```ruby
+# Gemfile
+
+gem 'kitchen-pulumi'
+```
+
+And then execute:
+
+```
+$ bundle
+```
+
+Or install it yourself as:
+
+```
+$ gem install kitchen-pulumi
+```
+
+## Quick Start / Tutorial
 
 Check out the [serverless-rest-api-lambda example](examples/aws/serverless-rest-api-lambda) and follow the instructions in its `README`.
 
-## Installation
+## Usage
 
-Kitchen-Pulumi is compatible with Ruby 2.4 and above.
+TODO: Write usage instructions here
+
+## Development
+
+After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+To install this gem onto your local machine, run `bundle exec rake install`.
+
+## Contributing
+
+Bug reports and pull requests are always welcome on GitHub at https://github.com/[USERNAME]/kitchen-pulumi. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Code of Conduct
+
+Everyone interacting in the Kitchen-Pulumi’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/kitchen-pulumi/blob/master/CODE_OF_CONDUCT.md).
+

@@ -13,7 +13,7 @@ module Kitchen
   #
   # @see https://www.rubydoc.info/gems/test-kitchen/Kitchen/Verifier
   module Verifier
-    # The verifier utilizes the {https://www.inspec.io/ InSpec infrastructure
+    # The verifier utilizes the {https://www.inspec.io/ InSpec} infrastructure
     # testing framework to verify the behaviour and
     # state of resources in the Pulumi state.
     #
@@ -100,7 +100,7 @@ module Kitchen
         raise ::Kitchen::ActionFailed, e.message
       end
 
-      # doctor checks the system and configuration for common errors.
+      # Checks the system and configuration for common errors.
       #
       # @param _kitchen_state [::Hash] the mutable Kitchen instance state.
       # @return [Boolean] false
@@ -114,6 +114,10 @@ module Kitchen
       attr_accessor :inspec_options_mapper, :error_messages
       attr_writer :inputs, :outputs
 
+      # Raises an error immediately if the `fail_fast` config attribute is set on the
+      #   or collects all errors until execution has ended verifier
+      #
+      # @return [void]
       def handle_error(message:)
         raise ::Kitchen::Pulumi::Error, message if config_fail_fast
 
@@ -121,6 +125,10 @@ module Kitchen
         error_messages.push message
       end
 
+      # Populates the `stack_inputs` and `stack_outputs` with the fully resolved stack
+      #   inputs and outputs produced by the appropriate Pulumi commands
+      #
+      # @return [void]
       def load_variables
         instance.driver.stack_outputs do |outputs:|
           self.outputs.replace(outputs)
@@ -151,6 +159,10 @@ module Kitchen
         )
       end
 
+      # Runs verification logic of the given system
+      #
+      # @param system [::Hash] the system to verify
+      # @return [void]
       def verify(system:)
         ::Kitchen::Pulumi::System.new(
           mapping: {
@@ -167,6 +179,10 @@ module Kitchen
         handle_error message: e.message
       end
 
+      # Runs verification logic for each system defined on the verifier's `systems` config
+      #   attribute
+      #
+      # @return [void]
       def verify_systems
         config_systems.each do |system|
           verify system: system

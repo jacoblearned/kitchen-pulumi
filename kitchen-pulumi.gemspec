@@ -24,7 +24,7 @@ DESC
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'pry', '~> 0.11'
   spec.add_development_dependency 'pry-byebug', '~> 3.6'
-  spec.add_development_dependency 'rake', '~> 12.3'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rspec-json_expectations', '~> 2.1'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'

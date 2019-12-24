@@ -1,0 +1,6 @@
+--no-private
+--title "Kitchen-Pulumi"
+--protected
+--markup=markdown
+lib/**/*.rb
+README

@@ -22,8 +22,13 @@ require 'kitchen/pulumi/config_attribute/secrets_provider'
 require 'kitchen/pulumi/config_attribute/preserve_config'
 
 module Kitchen
+  # This namespace is defined by Kitchen.
+  #
+  # @see https://www.rubydoc.info/gems/test-kitchen/Kitchen/Driver
   module Driver
     # Driver class implementing the CLI equivalency between Kitchen and Pulumi
+    #
+    # @author Jacob Learned
     class Pulumi < ::Kitchen::Driver::Base
       kitchen_driver_api_version 2
 
@@ -42,12 +47,26 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::SecretsProvider
       include ::Kitchen::Pulumi::ConfigAttribute::PreserveConfig
 
+      # Initializes a stack via `pulumi stack init`
+      #
+      # @param _state [::Hash] the current kitchen state
+      # @return [void]
       def create(_state)
         dir = "-C #{config_directory}"
         login
         initialize_stack(stack, dir)
       end
 
+      # Sets stack config values via `pulumi config` and updates the stack via `pulumi up`
+      #
+      # @param _state [::Hash] the current kitchen state
+      # @param config_only [Boolean] specify true to update the stack config without
+      #   applying changes to the stack via `pulumi up`
+      #
+      # for block {|temp_conf_file| ...}
+      # @yield [temp_conf_file] provides the path to the temporary config file used
+      #
+      # @return [void]
       def update(_state, config_only: false)
         dir = "-C #{config_directory}"
 
@@ -66,6 +85,10 @@ module Kitchen
         end
       end
 
+      # Destroys a stack via `pulumi destroy`
+      #
+      # @param _state [::Hash] the current kitchen state
+      # @return [void]
       def destroy(_state)
         dir = "-C #{config_directory}"
 
@@ -84,18 +107,30 @@ module Kitchen
         end
       end
 
+      # Returns `--preserve-config` if the `preserve_config` instance attribute is set
+      #
+      # @return [String] either `''` or `--preserve-config`
       def preserve_config
         return '' unless config_preserve_config
 
         '--preserve-config'
       end
 
+      # Returns the name of the current stack to use. If the `test_stack_name` driver
+      # attribute is set, then it uses that one, otherwise it will be
+      # `<suite name>-<platform name>`
+      #
+      # @return [String] either the empty string or '--preserve-config'
       def stack
         return config_test_stack_name unless config_test_stack_name.empty?
 
         "#{instance.suite.name}-#{instance.platform.name}"
       end
 
+      # Returns the name of the secrets provider, if set, optionally as a Pulumi CLI flag
+      #
+      # @param flag [Boolean] specify true to prepend `--secrets-provider=`` to the name
+      # @return [String] value to use for the secrets provider
       def secrets_provider(flag: false)
         return '' if config_secrets_provider.empty?
 
@@ -104,6 +139,9 @@ module Kitchen
         config_secrets_provider
       end
 
+      # Logs in to the Pulumi backend set for the instance via `pulumi login`
+      #
+      # @return [void]
       def login
         backend = config_backend == 'local' ? '--local' : config_backend
         ::Kitchen::Pulumi::ShellOut.run(
@@ -112,6 +150,10 @@ module Kitchen
         )
       end
 
+      # Initializes a stack in the current directory unless another is provided
+      #
+      # @param stack [String] name of the stack to initialize
+      # @param dir [String] path to the directory to run Pulumi commands in
       def initialize_stack(stack, dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "stack init #{stack} #{dir} #{secrets_provider(flag: true)}",
@@ -121,6 +163,14 @@ module Kitchen
         puts 'Continuing...' if e.message.match?(/stack '#{stack}' already exists/)
       end
 
+      # Configures a stack in the current directory unless another is provided
+      #
+      # @param stack_confs [::Hash] hash specifying the stack config for the instance
+      # @param stack [String] name of the stack to configure
+      # @param conf_file [String] path to a stack config file to use for configuration
+      # @param dir [String] path to the directory to run Pulumi commands in
+      # @param is_secret [Boolean] specify true to set the given stack config as secrets
+      # @return [void]
       def configure(stack_confs, stack, conf_file, dir = '', is_secret: false)
         secret = is_secret ? '--secret' : ''
         config_flag = config_file(conf_file, flag: true)
@@ -136,6 +186,12 @@ module Kitchen
         end
       end
 
+      # Refreshes a stack's config on the specified config file
+      #
+      # @param stack [String] name of the stack being refreshed
+      # @param conf_file [String] path to a stack config file to use for configuration
+      # @param dir [String] path to the directory to run Pulumi commands in
+      # @return [void]
       def refresh_config(stack, conf_file, dir = '')
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "config refresh -s #{stack} #{dir} #{config_file(conf_file, flag: true)}",
@@ -145,6 +201,12 @@ module Kitchen
         puts 'Continuing...' if e.message.match?(/no previous deployment/)
       end
 
+      # Get the value of the config file to use, if set on instance or provided as param,
+      # optionally as a command line flag `--config-file`
+      #
+      # @param conf_file [String] path to a stack config file to use for configuration
+      # @param flag [Boolean] specify true to prepend '--config-file ' to the config file
+      # @return [String] the path to the config file or its corresponding CLI flag
       def config_file(conf_file = '', flag: false)
         file = conf_file.empty? ? config_config_file : conf_file
         return '' if File.directory?(file) || file.empty?
@@ -154,6 +216,10 @@ module Kitchen
         file
       end
 
+      # Updates a stack via `pulumi up` according to instance attributes
+      #
+      # @param (see #refresh_config)
+      # @return [void]
       def update_stack(stack, conf_file, dir = '')
         base_cmd = "up -y -r --show-config -s #{stack} #{dir}"
         ::Kitchen::Pulumi::ShellOut.run(
@@ -162,6 +228,13 @@ module Kitchen
         )
       end
 
+      # Evolves a stack via successive calls to `pulumi config set` and `pulumi up`
+      # according to the `stack_evolution` instance attribute, if set. This permits
+      # testing stack config changes over time.
+      #
+      # @param (see #refresh_config)
+      # @param config_only [Boolean] specify true to prevent running `pulumi up`
+      # @return [void]
       def evolve_stack(stack, conf_file, dir = '', config_only: false)
         config_stack_evolution.each do |evolution|
           new_conf_file = config_file(evolution.fetch(:config_file, ''))
@@ -176,6 +249,14 @@ module Kitchen
         end
       end
 
+      # Rewrites a temporary config file by merging the contents of the new config file
+      # into the old config file. This is used during stack evolution to ensure that
+      # stack config changes for each evolution step are implemented correctly if the
+      # user has provided a new config file to use for a step.
+      #
+      # @param new_conf_file [String] the path to the new config file to use
+      # @param old_conf_file [String] the path to the config file to overwrite
+      # @return [void]
       def rewrite_config_file(new_conf_file, old_conf_file)
         return if new_conf_file.empty?
 
@@ -187,6 +268,16 @@ module Kitchen
         File.write(old_conf_file, new_conf.to_yaml)
       end
 
+      # Retrieves the fully resolved stack inputs based on the current configuration
+      # of the stack via `pulumi config`
+      #
+      # @param block [Block] block to run with stack inputs yielded to it
+      #
+      # for block {|stack_inputs| ... }
+      # @yield [stack_inputs] yields a hash of stack inputs
+      #
+      # @raise [Kitchen::ActionFailed] if an error occurs retrieving stack inputs
+      # @return [self]
       def stack_inputs(&block)
         update({}, config_only: true) do |temp_conf_file|
           ::Kitchen::Pulumi::Command::Input.run(
@@ -203,6 +294,15 @@ module Kitchen
         raise ::Kitchen::ActionFailed, e.message
       end
 
+      # Retrieves stack outputs via `pulumi stack output`
+      #
+      # @param block [Block] block to run with stack outputs yielded to it
+      #
+      # for block {|stack_outputs| ... }
+      # @yield [stack_outputs] yields a hash of stack outputs
+      #
+      # @raise [Kitchen::ActionFailed] if an error occurs retrieving stack outputs
+      # @return [self]
       def stack_outputs(&block)
         ::Kitchen::Pulumi::Command::Output.run(
           directory: config_directory,

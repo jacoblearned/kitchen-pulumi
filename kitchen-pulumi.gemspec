@@ -19,6 +19,7 @@ DESC
   spec.files = Dir.glob('{lib/**/*.rb,lib/**/*.yml,LICENSE,README.md}')
   spec.license = 'MIT'
   spec.description = desc
+  spec.metadata['yard.run'] = 'yri'
 
   spec.add_development_dependency 'guard', '~> 2.14'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
@@ -30,13 +31,14 @@ DESC
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'
   spec.add_development_dependency 'rubocop', '~> 0.67'
   spec.add_development_dependency 'simplecov', '~> 0.17'
+  spec.add_development_dependency 'yard', '~> 0.9'
 
   spec.add_dependency 'logger', '~> 1.2'
 
   spec.add_runtime_dependency 'dry-types', '~> 0.13'
   spec.add_runtime_dependency 'dry-validation', '~> 0.12'
   spec.add_runtime_dependency 'inspec', '>= 3', '< 5'
-  spec.add_runtime_dependency 'json', '>= 2.1', '< 2.3'
+  spec.add_runtime_dependency 'json', '>= 2.1', '< 2.4'
   spec.add_runtime_dependency 'mixlib-shellout', '>= 2.3', '< 4.0'
   spec.add_runtime_dependency 'test-kitchen', '>= 1.22', '< 3.0'
 end

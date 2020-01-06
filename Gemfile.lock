@@ -584,7 +584,7 @@ GEM
       rubyzip (~> 1.1)
       winrm (~> 2.0)
     wisper (2.0.1)
-    yard (0.9.20)
+    yard (0.9.23)
 
 PLATFORMS
   ruby

@@ -12,6 +12,10 @@ describe ::Kitchen::Driver::Pulumi do
   let(:bucket_name) { 'foo-bucket' }
 
   def kitchen_instance(driver_instance, kitchen_root)
+    state_file = ::Kitchen::StateFile.new(
+        kitchen_root,
+        'test-suite-test-platfrom',
+    ),
     ::Kitchen::Instance.new(
       driver: driver_instance,
       logger: driver_instance.send(:logger),
@@ -20,11 +24,8 @@ describe ::Kitchen::Driver::Pulumi do
       suite: ::Kitchen::Suite.new(name: 'test-suite'),
       transport: ::Kitchen::Transport::Base.new,
       verifier: ::Kitchen::Verifier::Base.new,
-      lifecycle_hooks: ::Kitchen::LifecycleHooks.new({}),
-      state_file: ::Kitchen::StateFile.new(
-        kitchen_root,
-        'test-suite-test-platfrom',
-      ),
+      lifecycle_hooks: ::Kitchen::LifecycleHooks.new({}, state_file),
+      state_file: state_file,
     )
   end
 

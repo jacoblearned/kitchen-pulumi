@@ -33,6 +33,7 @@ module Kitchen
       kitchen_driver_api_version 2
 
       include ::Kitchen::Pulumi::Configurable
+      include ::Kitchen::Logging
 
       # Include config attributes consumable via .kitchen.yml
       include ::Kitchen::Pulumi::ConfigAttribute::Config
@@ -314,6 +315,14 @@ module Kitchen
         self
       rescue ::Kitchen::Pulumi::Error => e
         raise ::Kitchen::ActionFailed, e.message
+      end
+
+      private
+
+      # @return [Logger] the common logger
+      # @api private
+      def logger
+        Kitchen.logger
       end
     end
   end

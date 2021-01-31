@@ -9,7 +9,7 @@ module Kitchen
     # Module orchestrating calls to the Pulumi CLI
     module ShellOut
       # Shells out to the Pulumi CLI
-      def self.run(cmd:, duration: 7200, logger:, &block)
+      def self.run(cmd:, logger:, duration: 7200, &block)
         cmds = Array(cmd)
         block ||= ->(stdout) { stdout }
         shell_out(commands: cmds, duration: duration, logger: logger, &block)
@@ -20,7 +20,7 @@ module Kitchen
         raise(::Kitchen::Pulumi::Error, "Error: #{e.message}")
       end
 
-      def self.shell_out(commands:, duration: 7200, logger:)
+      def self.shell_out(commands:, logger:, duration: 7200)
         commands.each do |command|
           shell_out = ::Mixlib::ShellOut.new(
             "pulumi #{command}",

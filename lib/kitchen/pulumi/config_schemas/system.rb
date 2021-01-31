@@ -3,7 +3,7 @@
 require 'dry/validation'
 require 'kitchen/pulumi/config_schemas'
 
-# rubocop:disable Metrics/LineLength
+# rubocop:disable Layout/LineLength
 # rubocop:disable Metrics/BlockLength
 module Kitchen
   module Pulumi
@@ -574,4 +574,4 @@ module Kitchen
   end
 end
 # rubocop:enable Metrics/BlockLength
-# rubocop:enable Metrics/LineLength
+# rubocop:enable Layout/LineLength

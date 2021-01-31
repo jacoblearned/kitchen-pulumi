@@ -1,20 +1,23 @@
 ---
 AllCops:
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.6
   Exclude:
     - 'vendor/**/*'
     - 'lib/kitchen/pulumi/deep_merge.rb'
+  NewCops: enable
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
-Metrics/LineLength:
+Layout/LineLength:
   Max: 90
 Metrics/ClassLength:
   Max: 175
 Metrics/MethodLength:
   Max: 15
 Metrics/AbcSize:
-  Max: 21
+  Max: 25
+Lint/SymbolConversion:
+  Enabled: false

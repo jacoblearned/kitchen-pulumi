@@ -62,7 +62,7 @@ module Kitchen
       attr_accessor :system_attributes_to_options
 
       def initialize
-        self.system_attributes_to_options = ::Kitchen::Pulumi::InSpecOptionsMapper::SYSTEM_ATTRIBUTES_TO_OPTIONS.dup # rubocop:disable Metrics/LineLength
+        self.system_attributes_to_options = ::Kitchen::Pulumi::InSpecOptionsMapper::SYSTEM_ATTRIBUTES_TO_OPTIONS.dup # rubocop:disable Layout/LineLength
       end
     end
   end

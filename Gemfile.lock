@@ -657,7 +657,7 @@ GEM
     yard (0.9.26)
 
 PLATFORMS
-  ruby
+  x86_64-darwin-17
 
 DEPENDENCIES
   guard (~> 2.14)
@@ -676,4 +676,4 @@ DEPENDENCIES
   yard (~> 0.9)
 
 BUNDLED WITH
-   1.17.2
+   2.2.7

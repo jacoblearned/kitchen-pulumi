@@ -18,7 +18,7 @@ jobs:
           keys:
             - kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
             - kitchen-pulumi-dependencies
-      - run: gem install bundler && bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: gem install bundler:2.2.7 && bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
             - vendor/bundle

@@ -13,9 +13,9 @@ describe ::Kitchen::Driver::Pulumi do
 
   def kitchen_instance(driver_instance, kitchen_root)
     state_file = ::Kitchen::StateFile.new(
-        kitchen_root,
-        'test-suite-test-platfrom',
-    ),
+      kitchen_root,
+      'test-suite-test-platfrom',
+    )
     ::Kitchen::Instance.new(
       driver: driver_instance,
       logger: driver_instance.send(:logger),

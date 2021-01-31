@@ -20,6 +20,7 @@ DESC
   spec.license = 'MIT'
   spec.description = desc
   spec.metadata['yard.run'] = 'yri'
+  spec.required_ruby_version = '>= 2.6'
 
   spec.add_development_dependency 'guard', '~> 2.14'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
@@ -30,6 +31,8 @@ DESC
   spec.add_development_dependency 'rspec-json_expectations', '~> 2.1'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'
   spec.add_development_dependency 'rubocop', '~> 1.9'
+  spec.add_development_dependency 'rubocop-rake', '~> 0.5'
+  spec.add_development_dependency 'rubocop-rspec', '~> 2.1'
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'yard', '~> 0.9'
 

@@ -1,12 +1,12 @@
 version: 2.1
 
 orbs:
-  pulumi: pulumi/pulumi@1.0.0
+  pulumi: pulumi/pulumi@2.0.0
 
 jobs:
-  build_24: &build
+  build_26: &build
     docker:
-      - image: circleci/ruby:2.4.6-node
+      - image: circleci/ruby:2.6-node
     steps:
       - checkout
 
@@ -18,7 +18,7 @@ jobs:
           keys:
             - kitchen-pulumi-dependencies-{{ checksum "Gemfile.lock" }}
             - kitchen-pulumi-dependencies
-      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: gem install bundler:2.2.7 && bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
             - vendor/bundle
@@ -64,19 +64,14 @@ jobs:
       # Run integration tests
       - run: bundle exec rake integration_test
 
-  build_25:
+  build_27:
     <<: *build
     docker:
-      - image: circleci/ruby:2.5.5-node
-
-  build_26:
-    <<: *build
-    docker:
-      - image: circleci/ruby:2.6.2-node
+      - image: circleci/ruby:2.7-node
 
   release_gem:
     docker:
-      - image: circleci/ruby:2.6.2-node
+      - image: circleci/ruby:2.7-node
     steps:
       - checkout
 
@@ -107,14 +102,12 @@ jobs:
 workflows:
   build:
     jobs:
-      - build_24
-      - build_25
       - build_26
+      - build_27
       - release_gem:
           requires:
-            - build_24
-            - build_25
             - build_26
+            - build_27
           filters:
             tags:
               only: /.*/

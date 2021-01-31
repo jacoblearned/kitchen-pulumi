@@ -38,19 +38,15 @@ module Kitchen
       # @param inputs [#to_hash] the config inputs provided to a stack
       # @param outputs [#to_hash] the outputs of the Pulumi stack under test.
       def initialize(inputs:, outputs:)
-        @inputs = inputs.map do |key, value|
-          [key, value.fetch('value', nil)]
-        end.to_h
-        @inputs.merge!(@inputs.map do |key, value|
-          ["input_#{key}", value]
-        end.to_h)
+        @inputs = inputs.transform_values do |value|
+          value.fetch('value', nil)
+        end
+        @inputs.merge!(@inputs.transform_keys { |key| "input_#{key}" })
 
         @outputs = Hash[outputs].map do |key, value|
           [key, value]
         end.to_h
-        @outputs.merge!(@outputs.map do |key, value|
-          ["output_#{key}", value]
-        end.to_h)
+        @outputs.merge!(@outputs.transform_keys { |key| "output_#{key}" })
       rescue ::KeyError => e
         raise ::Kitchen::Pulumi::Error, "System attrs resolution failed\n#{e}"
       end

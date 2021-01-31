@@ -63,7 +63,7 @@ module Kitchen
     # :reek:MissingSafeMethod {
     #  exclude: [ finalize_config!, load_needed_dependencies! ]
     # }
-    class Pulumi
+    class Pulumi < ::Kitchen::Verifier::Base
       include ::Kitchen::Configurable
       include ::Kitchen::Logging
       include ::Kitchen::Pulumi::ConfigAttribute::Color
@@ -75,7 +75,7 @@ module Kitchen
       attr_reader :inputs, :outputs
 
       def initialize(configuration = {})
-        init_config configuration
+        super(configuration)
         self.inspec_options_mapper = ::Kitchen::Pulumi::InSpecOptionsMapper.new
         self.error_messages = []
         self.inputs = {}

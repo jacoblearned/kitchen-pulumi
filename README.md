@@ -7,8 +7,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/35afd25bac772504e2a0/test_coverage)](https://codeclimate.com/github/jacoblearned/kitchen-pulumi/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/35afd25bac772504e2a0/maintainability)](https://codeclimate.com/github/jacoblearned/kitchen-pulumi/maintainability)
 
-Kitchen-Pulumi is a collection of [Test-Kitchen](https://kitchen.ci/) plugins for testing [Pulumi](https://www.pulumi.com/)-based cloud infrastructure projects
-under the [test-driven infrastructure](https://www.arresteddevops.com/tdi/) paradigm.
+Kitchen-Pulumi is a collection of [Test-Kitchen](https://kitchen.ci/) plugins for developing test-driven [Pulumi](https://www.pulumi.com/)-based cloud infrastructure projects.
 With Kitchen-Pulumi you can provision ephemeral test stacks, verify they are in a desired state using [InSpec](https://www.inspec.io/), and tear them down to gain
 confidence in your infrastructure code before it hits production.
 
@@ -27,12 +26,12 @@ If there's a feature you would like to see in Kitchen-Pulumi, please create an i
 
 ## Installation
 
-Kitchen-Pulumi is compatible with Ruby 2.4 and above. Add this line to your application's Gemfile:
+Kitchen-Pulumi is compatible with Ruby 2.6 and above. Add this line to your application's Gemfile:
 
 ```ruby
 # Gemfile
 
-gem 'kitchen-pulumi'
+gem 'kitchen-pulumi', require: false
 ```
 
 And then execute:

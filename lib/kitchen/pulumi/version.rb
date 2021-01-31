@@ -2,4 +2,4 @@
 
 require 'kitchen/pulumi'
 
-::Kitchen::Pulumi::VERSION = '0.0.1'
+::Kitchen::Pulumi::VERSION = '0.1.0'

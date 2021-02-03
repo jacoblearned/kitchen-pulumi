@@ -1,5 +1,5 @@
 control "integration test" do
   describe http(input('endpoint')) do
-    its ('body') { should eq 'integration test'}
+    its ('body') { should eq input("kitchen-pulumi-azure-functions:api_response")}
   end
 end

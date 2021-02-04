@@ -1,0 +1,11 @@
+{
+    "name": "kitchen-pulumi-azure-functions",
+    "version": "0.1.0",
+    "devDependencies": {
+        "@types/node": "^8.0.0"
+    },
+    "dependencies": {
+        "@pulumi/azure": "^3.0.0",
+        "@pulumi/pulumi": "^2.0.0"
+    }
+}

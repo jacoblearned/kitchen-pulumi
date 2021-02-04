@@ -1,0 +1,6 @@
+name: kitchen-pulumi-azure-functions
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: Testing Azure Function deployment with kitchen-pulumi

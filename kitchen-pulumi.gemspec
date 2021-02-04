@@ -41,7 +41,7 @@ DESC
   spec.add_runtime_dependency 'dry-types', '~> 0.13'
   spec.add_runtime_dependency 'dry-validation', '~> 0.12'
   spec.add_runtime_dependency 'inspec', '>= 3', '< 5'
-  spec.add_runtime_dependency 'json', '>= 2.1', '< 2.4'
+  spec.add_runtime_dependency 'json', '>= 2.1', '< 2.6'
   spec.add_runtime_dependency 'mixlib-shellout', '>= 2.3', '< 4.0'
   spec.add_runtime_dependency 'test-kitchen', '>= 1.22', '< 3.0'
 end

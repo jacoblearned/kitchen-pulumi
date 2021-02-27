@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kitchen-pulumi (0.1.0)
+    kitchen-pulumi (0.1.1)
       dry-types (~> 0.13)
       dry-validation (~> 0.12)
       inspec (>= 3, < 5)

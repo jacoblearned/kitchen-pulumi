@@ -72,14 +72,14 @@ module Kitchen
       include ::Kitchen::Pulumi::Configurable
       @api_version = 2
 
-      attr_reader :inputs, :outputs
+      attr_reader :pulumi_inputs, :pulumi_outputs
 
       def initialize(configuration = {})
         super(configuration)
-        self.inspec_options_mapper = ::Kitchen::Pulumi::InSpecOptionsMapper.new
-        self.error_messages = []
-        self.inputs = {}
-        self.outputs = {}
+        @inspec_options_mapper = ::Kitchen::Pulumi::InSpecOptionsMapper.new
+        @error_messages = []
+        @pulumi_inputs = {}
+        @pulumi_outputs = {}
       end
 
       # The verifier enumerates through each host of each system and verifies
@@ -112,7 +112,7 @@ module Kitchen
       private
 
       attr_accessor :inspec_options_mapper, :error_messages
-      attr_writer :inputs, :outputs
+      attr_writer :pulumi_inputs, :pulumi_outputs
 
       # Raises an error immediately if the `fail_fast` config attribute is set on the
       #   or collects all errors until execution has ended verifier
@@ -131,11 +131,11 @@ module Kitchen
       # @return [void]
       def load_variables
         instance.driver.stack_outputs do |outputs:|
-          self.outputs.replace(outputs)
+          @pulumi_outputs.replace(outputs)
         end
 
         instance.driver.stack_inputs do |inputs:|
-          self.inputs.replace(inputs)
+          @pulumi_inputs.replace(inputs)
         end
       end
 
@@ -171,9 +171,9 @@ module Kitchen
             ],
           }.merge(system),
         ).verify(
-          inputs: inputs,
+          pulumi_inputs: @pulumi_inputs,
+          pulumi_outputs: @pulumi_outputs,
           inspec_options: system_inspec_options(system: system),
-          outputs: outputs,
         )
       rescue StandardError => e
         handle_error message: e.message

@@ -3,19 +3,19 @@
 require 'kitchen/pulumi/error'
 require 'kitchen/pulumi/inspec_with_hosts'
 require 'kitchen/pulumi/inspec_without_hosts'
-require 'kitchen/pulumi/system_attrs_resolver'
+require 'kitchen/pulumi/system_inputs_resolver'
 require 'kitchen/pulumi/system_hosts_resolver'
 
 module Kitchen
   module Pulumi
     # System is the class of objects which are verified by the Pulumi Verifier.
     class System
-      # #add_attrs adds attributes to the system.
+      # #add_inputs adds Inspec Inputs to the system.
       #
-      # @param attrs [#to_hash] the attributes to be added.
+      # @param inputs [#to_hash] the inputs to be added.
       # @return [self]
-      def add_attrs(attrs:)
-        @attributes = @attributes.merge Hash attrs
+      def add_inputs(inputs:)
+        @inputs = @inputs.merge Hash inputs
 
         self
       end
@@ -51,15 +51,15 @@ module Kitchen
 
       # #verify verifies the system by executing InSpec.
       #
-      # @param inputs [::Hash] the Pulumi input values to be utilized as
-      #   InSpec profile attributes.
+      # @param pulumi_inputs [::Hash] the Pulumi input values to be utilized as
+      #   InSpec profile Input.
+      # @param pulumi_outputs [::Hash] the Pulumi output values to be utilized as
+      #   InSpec profile Input.
       # @param inspec_options [::Hash] the options to be passed to InSpec.
-      # @param outputs [::Hash] the Pulumi output values to be utilized as
-      #   InSpec profile attributes.
       # @return [self]
-      def verify(inputs:, inspec_options:, outputs:)
-        resolve inputs: inputs, outputs: outputs
-        execute_inspec options: inspec_options
+      def verify(pulumi_inputs:, pulumi_outputs:, inspec_options:)
+        resolve(pulumi_inputs: pulumi_inputs, pulumi_outputs: pulumi_outputs)
+        execute_inspec(options: inspec_options)
 
         self
       rescue StandardError => e
@@ -70,16 +70,13 @@ module Kitchen
 
       def execute_inspec(options:)
         inspec.new(
-          options: options_with_attributes(options: options),
+          options: options_with_inputs(options: options),
           profile_locations: @mapping.fetch(:profile_locations),
         ).exec(system: self)
       end
 
       def initialize(mapping:)
-        @attributes = {}
-        @attrs_outputs = mapping.fetch :attrs_outputs do
-          {}
-        end
+        @inputs = {}
         @hosts = mapping.fetch :hosts do
           []
         end
@@ -94,31 +91,27 @@ module Kitchen
         end
       end
 
-      def options_with_attributes(options:)
-        options.merge attributes: @attributes
+      def options_with_inputs(options:)
+        options.merge(inputs: @inputs)
       end
 
-      def resolve(inputs:, outputs:)
-        resolve_attrs inputs: inputs, outputs: outputs
-        resolve_hosts outputs: outputs
+      def resolve(pulumi_inputs:, pulumi_outputs:)
+        resolve_inputs(pulumi_inputs: pulumi_inputs, pulumi_outputs: pulumi_outputs)
+        resolve_hosts(pulumi_outputs: pulumi_outputs)
       end
 
-      def resolve_attrs(inputs:, outputs:)
-        ::Kitchen::Pulumi::SystemAttrsResolver.new(
-          inputs: inputs, outputs: outputs,
-        ).resolve(
-          attrs_outputs_keys: @attrs_outputs.keys,
-          attrs_outputs_values: @attrs_outputs.values,
-          system: self,
-        )
+      def resolve_inputs(pulumi_inputs:, pulumi_outputs:)
+        ::Kitchen::Pulumi::SystemInputsResolver.new(
+          pulumi_inputs: pulumi_inputs, pulumi_outputs: pulumi_outputs, system: self,
+        ).resolve
 
         self
       end
 
-      def resolve_hosts(outputs:)
-        return self unless @mapping.key? :hosts_output
+      def resolve_hosts(pulumi_outputs:)
+        return self unless @mapping.key?(:hosts_output)
 
-        ::Kitchen::Pulumi::SystemHostsResolver.new(outputs: outputs).resolve(
+        ::Kitchen::Pulumi::SystemHostsResolver.new(outputs: pulumi_outputs).resolve(
           hosts_output: @mapping.fetch(:hosts_output),
           system: self,
         )

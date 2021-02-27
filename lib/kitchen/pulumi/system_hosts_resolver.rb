@@ -27,7 +27,7 @@ module Kitchen
       #
       # @param outputs [#to_hash] the outputs of the Pulumi stack under test.
       def initialize(outputs:)
-        @outputs = Hash[outputs]
+        @outputs = outputs.to_h
       end
     end
   end

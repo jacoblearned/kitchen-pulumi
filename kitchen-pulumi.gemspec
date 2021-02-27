@@ -30,7 +30,7 @@ DESC
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rspec-json_expectations', '~> 2.1'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.3'
-  spec.add_development_dependency 'rubocop', '~> 1.9'
+  spec.add_development_dependency 'rubocop', '~> 1.10'
   spec.add_development_dependency 'rubocop-rake', '~> 0.5'
   spec.add_development_dependency 'rubocop-rspec', '~> 2.1'
   spec.add_development_dependency 'simplecov', '~> 0.21'

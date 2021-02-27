@@ -33,7 +33,7 @@ module Kitchen
         end
         @pulumi_inputs.merge!(@pulumi_inputs.transform_keys { |key| "input_#{key}" })
 
-        @pulumi_outputs = Hash[pulumi_outputs].map do |key, value|
+        @pulumi_outputs = pulumi_outputs.to_h.map do |key, value|
           [key, value]
         end.to_h
         @pulumi_outputs.merge!(@pulumi_outputs.transform_keys { |key| "output_#{key}" })

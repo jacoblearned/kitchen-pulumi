@@ -396,7 +396,7 @@ GEM
       mixlib-versioning
       thor
     mixlib-log (3.0.9)
-    mixlib-shellout (3.2.2)
+    mixlib-shellout (3.2.5)
       chef-utils
     mixlib-versioning (1.2.12)
     ms_rest (0.7.6)

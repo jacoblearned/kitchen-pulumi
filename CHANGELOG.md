@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2021-04-07
+### Added
+- `kitchen create` will now show a preview of the `pulumi up` command made during `kitchen converge`
+
 ## [0.1.1] - 2021-02-26
 ### Added
 - Replaces deprecated InSpec Attributes with InSpec Inputs

@@ -48,7 +48,7 @@ module Kitchen
       include ::Kitchen::Pulumi::ConfigAttribute::SecretsProvider
       include ::Kitchen::Pulumi::ConfigAttribute::PreserveConfig
 
-      # Initializes a stack via `pulumi stack init`
+      # Initializes a stack via `pulumi stack init` & run a preview of changes
       #
       # @param _state [::Hash] the current kitchen state
       # @return [void]
@@ -56,13 +56,23 @@ module Kitchen
         dir = "-C #{config_directory}"
         login
         initialize_stack(stack, dir)
+
+        ::Kitchen::Pulumi.with_temp_conf(config_file) do |temp_conf_file|
+          refresh_config(stack, temp_conf_file, dir) if config_refresh_config
+          configure(config_config, stack, temp_conf_file, dir)
+          configure(config_secrets, stack, temp_conf_file, dir, is_secret: true)
+          preview_stack(stack, temp_conf_file, dir)
+        end
       end
 
       # Sets stack config values via `pulumi config` and updates the stack via `pulumi up`
       #
       # @param _state [::Hash] the current kitchen state
       # @param config_only [Boolean] specify true to update the stack config without
-      #   applying changes to the stack via `pulumi up`
+      #   applying changes to the stack via `pulumi up`. This is used primarily for
+      #   setting the correct stack inputs by successively applying `pulumi config` in
+      #   the order of precedence for specifying stack config values in the config file or
+      #   kitchen.yml file.
       #
       # for block {|temp_conf_file| ...}
       # @yield [temp_conf_file] provides the path to the temporary config file used
@@ -223,6 +233,20 @@ module Kitchen
       # @return [void]
       def update_stack(stack, conf_file, dir = '')
         base_cmd = "up -y -r --show-config -s #{stack} #{dir}"
+        ::Kitchen::Pulumi::ShellOut.run(
+          cmd: "#{base_cmd} #{config_file(conf_file, flag: true)}",
+          logger: logger,
+        )
+      end
+
+      # Preview effects of `pulumi up`
+      #
+      # @param stack [String] name of the stack being refreshed
+      # @param conf_file [String] path to a stack config file to use for configuration
+      # @param dir [String] path to the directory to run Pulumi commands in
+      # @return [void]
+      def preview_stack(stack, conf_file, dir = '')
+        base_cmd = "preview -r --show-config -s #{stack} #{dir}"
         ::Kitchen::Pulumi::ShellOut.run(
           cmd: "#{base_cmd} #{config_file(conf_file, flag: true)}",
           logger: logger,

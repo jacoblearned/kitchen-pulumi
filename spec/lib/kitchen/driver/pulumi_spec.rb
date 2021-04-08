@@ -69,18 +69,21 @@ describe ::Kitchen::Driver::Pulumi do
   end
 
   context '#create' do
-    it 'should initialize a stack' do
+    it 'should initialize a stack and preview an update' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver
+        driver = configure_driver(config_file: 'custom-stack-config-file.yaml')
         expect { driver.create({}) }
-          .to output(/Created stack 'kitchen-pulumi-test/)
+          .to output(/Previewing update \(kitchen-pulumi-test/)
           .to_stdout_from_any_process
       end
     end
 
     it 'should allow overrides of the stack name' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(test_stack_name: stack_name)
+        driver = configure_driver(
+          test_stack_name: stack_name,
+          config_file: 'custom-stack-config-file.yaml',
+        )
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -91,6 +94,7 @@ describe ::Kitchen::Driver::Pulumi do
         driver = configure_driver(
           test_stack_name: stack_name,
           secrets_provider: 'awskms://1234abcd-12ab-34cd-56-1234567890?region=us-east-1',
+          config_file: 'custom-stack-config-file.yaml',
         )
         expect { driver.create({}) }
           .to output(/error/).to_stdout_from_any_process
@@ -99,7 +103,11 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow local backends' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(test_stack_name: stack_name, backend: 'file://~')
+        driver = configure_driver(
+          test_stack_name: stack_name,
+          backend: 'file://~',
+          config_file: 'custom-stack-config-file.yaml',
+        )
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -107,7 +115,11 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow local backend with convenient name "local"' do
       in_tmp_project_dir('test-project') do
-        driver = configure_driver(test_stack_name: stack_name, backend: 'local')
+        driver = configure_driver(
+          test_stack_name: stack_name,
+          backend: 'local',
+          config_file: 'custom-stack-config-file.yaml',
+        )
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process
       end
@@ -115,7 +127,7 @@ describe ::Kitchen::Driver::Pulumi do
 
     it 'should allow custom config files' do
       in_tmp_project_dir('test-project') do
-        config_file = 'custom-test-config-file.yaml'
+        config_file = 'custom-stack-config-file.yaml'
         driver = configure_driver(test_stack_name: stack_name, config_file: config_file)
         expect { driver.create({}) }
           .to output(/Created stack '#{stack_name}'/).to_stdout_from_any_process

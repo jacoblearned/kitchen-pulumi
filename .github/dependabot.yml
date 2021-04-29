@@ -1,0 +1,43 @@
+version: 2
+updates:
+- package-ecosystem: bundler
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: inspec
+    versions:
+    - 4.18.104
+    - 4.31.1
+    - 4.32.0
+    - 4.33.1
+  - dependency-name: rubocop
+    versions:
+    - 1.10.0
+    - 1.12.0
+    - 1.9.0
+  - dependency-name: test-kitchen
+    versions:
+    - 2.10.0
+    - 2.11.0
+  - dependency-name: mixlib-shellout
+    versions:
+    - 3.2.2
+    - 3.2.5
+  - dependency-name: yard
+    versions:
+    - 0.9.26
+  - dependency-name: pry
+    versions:
+    - 0.13.1
+  - dependency-name: simplecov
+    versions:
+    - 0.21.2
+  - dependency-name: pry-byebug
+    versions:
+    - 3.8.0
+  - dependency-name: guard
+    versions:
+    - 2.16.2
